@@ -5,6 +5,7 @@
   "description": "WhatsApp Business Automation Platform - Frontend",
   "scripts": {
     "dev": "next dev",
+    "dev-https": "next dev --experimental-https",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
