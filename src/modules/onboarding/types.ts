@@ -15,3 +15,10 @@ export interface OnboardingStatus {
   steps: OnboardingStep[];
   completed: boolean;
 }
+
+export interface WabaBindRequest {
+  code: string;
+  wabaId: string;
+  phoneNumberId: string;
+  solutionId: string;
+}
