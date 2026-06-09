@@ -6,6 +6,8 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
+import PrivacyPolicyLink from "@/components/common/PrivacyPolicyLink";
+import TermsOfServiceLink from "@/components/common/TermsOfServiceLink";
 import { PAGE_ROUTES } from "@/lib/constants";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -141,13 +143,8 @@ export default function SignUpForm() {
             <Checkbox checked={isChecked} onChange={setIsChecked} />
             <p className="text-sm text-gray-600 dark:text-gray-400">
               By creating an account means you agree to the{" "}
-              <Link href="#" className={linkClass}>
-                Terms and Conditions
-              </Link>
-              , and our{" "}
-              <Link href="#" className={linkClass}>
-                Privacy Policy
-              </Link>
+              <TermsOfServiceLink label="Terms and Conditions" />
+              , and our <PrivacyPolicyLink />
             </p>
           </div>
           <Button type="submit" disabled={isSubmitting}>

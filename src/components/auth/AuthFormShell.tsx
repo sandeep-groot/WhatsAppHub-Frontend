@@ -1,5 +1,6 @@
 "use client";
 
+import AuthLegalFooter from "@/components/auth/AuthLegalFooter";
 import type { ReactNode } from "react";
 
 interface AuthFormShellProps {
@@ -30,6 +31,10 @@ export default function AuthFormShell({
         {children}
 
         {footer ? <div className="mt-6">{footer}</div> : null}
+
+        <div className="mt-8 border-t border-gray-200 pt-6 dark:border-gray-700">
+          <AuthLegalFooter />
+        </div>
       </div>
     </div>
   );

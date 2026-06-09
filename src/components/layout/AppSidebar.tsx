@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import DataDeletionLink from "@/components/common/DataDeletionLink";
+import PrivacyPolicyLink from "@/components/common/PrivacyPolicyLink";
+import TermsOfServiceLink from "@/components/common/TermsOfServiceLink";
 import { useSidebar } from "@/context/SidebarContext";
 import { PAGE_ROUTES } from "@/lib/constants";
 
@@ -69,6 +72,32 @@ const AuditIcon = () => (
     <line x1="16" y1="13" x2="8" y2="13" />
     <line x1="16" y1="17" x2="8" y2="17" />
     <polyline points="10 9 9 9 8 9" />
+  </svg>
+);
+
+const PolicyIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+  </svg>
+);
+
+const TermsIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+    <rect x="9" y="3" width="6" height="4" rx="1" />
+    <path d="M9 14l2 2 4-4" />
+  </svg>
+);
+
+const DeletionIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
   </svg>
 );
 
@@ -232,6 +261,42 @@ const AppSidebar: React.FC = () => {
             </span>
             {show && <span>Settings</span>}
           </Link>
+          <div className={`mt-3 space-y-1 px-2 ${show ? "" : "flex flex-col items-center"}`}>
+            {show ? (
+              <>
+                <TermsOfServiceLink className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400" />
+                <PrivacyPolicyLink className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400" />
+                <DataDeletionLink
+                  label="Data Deletion"
+                  className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400"
+                />
+              </>
+            ) : (
+              <>
+                <Link
+                  href={PAGE_ROUTES.TERMS}
+                  title="Terms of Service"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-emerald-400"
+                >
+                  <TermsIcon />
+                </Link>
+                <Link
+                  href={PAGE_ROUTES.PRIVACY}
+                  title="Privacy Policy"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-emerald-400"
+                >
+                  <PolicyIcon />
+                </Link>
+                <Link
+                  href={PAGE_ROUTES.DATA_DELETION}
+                  title="Data Deletion Instructions"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-emerald-400"
+                >
+                  <DeletionIcon />
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </aside>
 
@@ -268,6 +333,14 @@ const AppSidebar: React.FC = () => {
             </span>
             <span>Settings</span>
           </Link>
+          <div className="mt-3 space-y-1 px-2">
+            <TermsOfServiceLink className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400" />
+            <PrivacyPolicyLink className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400" />
+            <DataDeletionLink
+              label="Data Deletion"
+              className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400"
+            />
+          </div>
         </div>
       </aside>
     </>
