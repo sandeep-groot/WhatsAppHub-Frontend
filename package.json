@@ -4,8 +4,8 @@
   "private": true,
   "description": "WhatsApp Business Automation Platform - Frontend",
   "scripts": {
-    "dev": "next dev",
-    "dev-https": "next dev --experimental-https",
+    "dev": "next dev --webpack",
+    "dev-https": "next dev --experimental-https --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

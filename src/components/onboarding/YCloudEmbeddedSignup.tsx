@@ -41,6 +41,11 @@ export default function YCloudEmbeddedSignup({
       return;
     }
 
+    // If FB is already loaded on the window object (from a previous session/mount), enable the button immediately
+    if (window.FB) {
+      setIsSdkLoaded(true);
+    }
+
     // 1. Initialize Facebook SDK once loaded
     window.fbAsyncInit = function () {
       window.FB.init({
@@ -52,16 +57,16 @@ export default function YCloudEmbeddedSignup({
       setIsSdkLoaded(true);
     };
 
-    // 2. Load SDK script dynamically
-    (function (d, s, id) {
-      if (d.getElementById(id)) return;
-      const js = d.createElement(s) as HTMLScriptElement;
-      js.id = id;
+    // 2. Load SDK script dynamically (if not already injected)
+    const scriptId = "facebook-jssdk";
+    if (!document.getElementById(scriptId)) {
+      const js = document.createElement("script") as HTMLScriptElement;
+      js.id = scriptId;
       js.defer = true;
       js.src = "https://connect.facebook.net/en_US/sdk.js";
-      const fjs = d.getElementsByTagName(s)[0];
-      fjs.parentNode?.insertBefore(js, fjs);
-    })(document, "script", "facebook-jssdk");
+      const fjs = document.getElementsByTagName("script")[0];
+      fjs?.parentNode?.insertBefore(js, fjs);
+    }
 
     // 3. Register window postMessage listener for Meta's Embedded Signup events
     const sessionInfoListener = (event: MessageEvent) => {
