@@ -108,15 +108,25 @@ const SettingsIcon = () => (
   </svg>
 );
 
+const ConnectionsIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <rect x="16" y="3" width="6" height="6" rx="1" />
+    <rect x="16" y="15" width="6" height="6" rx="1" />
+    <rect x="2" y="9" width="6" height="6" rx="1" />
+    <path d="M8 12h8m-3-3v6" />
+  </svg>
+);
+
 const navItems: NavItem[] = [
   { name: "Dashboard", icon: <DashboardIcon />, path: PAGE_ROUTES.DASHBOARD },
   { name: "Clients",   icon: <ClientsIcon />,   path: PAGE_ROUTES.CLIENTS },
+  { name: "Connections", icon: <ConnectionsIcon />, path: PAGE_ROUTES.CONNECTIONS },
   { name: "Onboarding", icon: <OnboardingIcon />, path: PAGE_ROUTES.ONBOARDING },
 ];
 
 const managementItems: NavItem[] = [
-  { name: "Users",      icon: <UsersIcon />,    path: PAGE_ROUTES.USERS },
-  { name: "Roles",      icon: <RolesIcon />,    path: PAGE_ROUTES.ROLES },
+  // { name: "Users",      icon: <UsersIcon />,    path: PAGE_ROUTES.USERS },
+  // { name: "Roles",      icon: <RolesIcon />,    path: PAGE_ROUTES.ROLES },
   { name: "Webhooks",   icon: <WebhooksIcon />, path: PAGE_ROUTES.WEBHOOKS },
   { name: "Audit Logs", icon: <AuditIcon />,    path: PAGE_ROUTES.AUDIT_LOGS },
 ];

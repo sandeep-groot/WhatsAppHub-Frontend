@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/http";
+import Link from "next/link";
 
 interface OnboardingStep {
   id: string;
@@ -99,9 +100,20 @@ function ClientsContent() {
     <div className="flex h-[82vh] gap-6 overflow-hidden animate-fade-in">
       {/* LEFT: Client Directory Sidebar */}
       <div className="w-80 flex flex-col rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 shrink-0 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white">Clients Directory</h2>
-          <div className="mt-3 relative">
+        <div className="p-4 border-b border-gray-100 dark:border-gray-800 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">Clients Directory</h2>
+          </div>
+          <Link
+            href="/onboarding"
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs shadow-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Connect New WABA
+          </Link>
+          <div className="relative">
             <input
               type="text"
               placeholder="Search clients..."
