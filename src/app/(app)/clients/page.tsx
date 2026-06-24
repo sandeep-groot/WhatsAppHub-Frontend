@@ -99,20 +99,22 @@ function ClientsContent() {
   return (
     <div className="flex h-[82vh] gap-6 overflow-hidden animate-fade-in">
       {/* LEFT: Client Directory Sidebar */}
-      <div className="w-80 flex flex-col rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 shrink-0 overflow-hidden shadow-sm">
+      <div className="w-full flex flex-col rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
         <div className="p-4 border-b border-gray-100 dark:border-gray-800 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-gray-900 dark:text-white">Clients Directory</h2>
           </div>
-          <Link
-            href="/onboarding"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs shadow-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-          >
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Connect New WABA
-          </Link>
+          <div className="flex justify-end">
+            <Link
+              href="/onboarding"
+              className="flex items-center  gap-2 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs shadow-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Connect New WABA
+            </Link>
+          </div>
           <div className="relative">
             <input
               type="text"
@@ -146,11 +148,10 @@ function ClientsContent() {
                 <button
                   key={n.id}
                   onClick={() => selectNumber(n.id)}
-                  className={`w-full flex flex-col gap-1 p-3 rounded-xl text-left transition-colors ${
-                    active
-                      ? "bg-emerald-50/50 dark:bg-gray-700/50 text-emerald-800 dark:text-white"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-700/20 text-gray-700 dark:text-gray-300"
-                  }`}
+                  className={`w-full flex flex-col gap-1 p-3 rounded-xl text-left transition-colors ${active
+                    ? "bg-emerald-50/50 dark:bg-gray-700/50 text-emerald-800 dark:text-white"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-700/20 text-gray-700 dark:text-gray-300"
+                    }`}
                 >
                   <div className="flex items-center justify-between w-full">
                     <span className="font-bold text-sm truncate max-w-[170px]">{n.client.name}</span>
@@ -167,200 +168,7 @@ function ClientsContent() {
         </div>
       </div>
 
-      {/* RIGHT: Workspace details & Chat timeline */}
-      <div className="flex-1 flex flex-col rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
-        {!activeNumber ? (
-          <div className="flex flex-col items-center justify-center flex-1 p-6 text-center">
-            <div className="h-16 w-16 flex items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 shadow-inner">
-              <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white mt-4">No Connection Selected</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mt-1 leading-relaxed">
-              Select a client account from the sidebar directory to view active conversation threads and onboarding checklists.
-            </p>
-          </div>
-        ) : (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Connection workspace Header */}
-            <div className="flex flex-col gap-3 md:flex-row md:items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
-              <div>
-                <h2 className="text-base font-bold text-gray-900 dark:text-white">{activeNumber.client.name}</h2>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="font-mono text-xs text-gray-400 dark:text-gray-500">{activeNumber.phoneNumber}</span>
-                  <span className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-                  <span className="text-xs text-gray-400 dark:text-gray-500">BSP: YCloud</span>
-                </div>
-              </div>
 
-              {/* Tabs selector */}
-              <div className="flex items-center bg-gray-50 dark:bg-gray-900 rounded-xl p-1 shrink-0 border border-gray-100 dark:border-gray-800">
-                <button
-                  onClick={() => setActiveTab("chat")}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
-                    activeTab === "chat"
-                      ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
-                      : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  }`}
-                >
-                  Messages
-                </button>
-                <button
-                  onClick={() => setActiveTab("onboarding")}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
-                    activeTab === "onboarding"
-                      ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
-                      : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  }`}
-                >
-                  Onboarding Checklist
-                </button>
-              </div>
-            </div>
-
-            {/* TAB CONTENT: Conversation thread */}
-            {activeTab === "chat" && (
-              <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Date filter bar */}
-                <div className="flex flex-wrap items-center gap-3 px-5 py-3 bg-gray-50/50 dark:bg-gray-900/10 border-b border-gray-100 dark:border-gray-800 shrink-0">
-                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Date Filters:</span>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-800 dark:text-white focus:outline-none"
-                  />
-                  <span className="text-xs text-gray-400">to</span>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-800 dark:text-white focus:outline-none"
-                  />
-                  {(startDate || endDate) && (
-                    <button
-                      onClick={() => {
-                        setStartDate("");
-                        setEndDate("");
-                      }}
-                      className="text-xs font-bold text-error-600 dark:text-error-400 hover:underline"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-
-                {/* Conversation Timeline */}
-                <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50/30 dark:bg-gray-900/5 flex flex-col-reverse">
-                  {isMessagesLoading ? (
-                    <div className="flex justify-center py-8">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-                    </div>
-                  ) : messages?.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center flex-1 py-12 text-center">
-                      <p className="text-xs text-gray-400 dark:text-gray-500">No message history logged for this connection.</p>
-                    </div>
-                  ) : (
-                    messages?.map((msg) => {
-                      const isIncoming = msg.direction === "INBOUND";
-                      const msgDate = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                      return (
-                        <div
-                          key={msg.id}
-                          className={`flex flex-col max-w-[70%] gap-1 ${
-                            isIncoming ? "self-start items-start" : "self-end items-end"
-                          }`}
-                        >
-                          <span className="text-[10px] text-gray-400 dark:text-gray-500 px-1">
-                            {isIncoming ? msg.senderNumber : "Platform Admin"}
-                          </span>
-                          
-                          <div
-                            className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
-                              isIncoming
-                                ? "bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-800/80 rounded-tl-none"
-                                : "bg-emerald-500 text-white rounded-tr-none"
-                            }`}
-                          >
-                            <p className="whitespace-pre-wrap">{msg.messageBody}</p>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 px-1">
-                            <span className="text-[9px] text-gray-400 dark:text-gray-500">{msgDate}</span>
-                            {!isIncoming && (
-                              <span className="text-[9px] font-bold uppercase text-emerald-600 dark:text-emerald-400">
-                                {msg.status}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* TAB CONTENT: Onboarding stepper */}
-            {activeTab === "onboarding" && (
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-                  Onboarding Step-by-Step Tracker
-                </h3>
-
-                <div className="relative border-l border-gray-200 dark:border-gray-700 ml-4 pl-6 space-y-8 py-2">
-                  {STEP_DETAILS.map((step, idx) => {
-                    const stepNum = idx + 1;
-                    const stepState = activeNumber.steps.find((s) => s.stepNumber === stepNum);
-                    const status = stepState?.status || "PENDING";
-
-                    // Visual indicators based on status
-                    let markerBg = "bg-gray-100 dark:bg-gray-800 text-gray-400";
-                    let stepTitleColor = "text-gray-400 dark:text-gray-500";
-                    let icon = stepNum.toString();
-
-                    if (status === "DONE") {
-                      markerBg = "bg-emerald-500 text-white shadow-sm shadow-emerald-500/20";
-                      stepTitleColor = "text-gray-950 dark:text-white";
-                      icon = "✓";
-                    } else if (status === "IN_PROGRESS") {
-                      markerBg = "bg-warning-500 text-white animate-pulse shadow-sm shadow-warning-500/20";
-                      stepTitleColor = "text-warning-800 dark:text-warning-400 font-bold";
-                    } else if (status === "BLOCKED") {
-                      markerBg = "bg-error-500 text-white animate-bounce";
-                      stepTitleColor = "text-error-800 dark:text-error-400 font-bold";
-                      icon = "⚠️";
-                    }
-
-                    return (
-                      <div key={stepNum} className="relative flex gap-4">
-                        {/* Dot marker */}
-                        <div className={`absolute -left-[37px] flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${markerBg}`}>
-                          {icon}
-                        </div>
-
-                        <div className="space-y-1">
-                          <h4 className={`text-sm font-bold ${stepTitleColor}`}>{step.name}</h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{step.desc}</p>
-                          {status === "BLOCKED" && stepState?.notes && (
-                            <div className="mt-2 p-3 rounded-lg bg-error-50 border border-error-100 dark:bg-error-500/10 dark:border-error-500/20">
-                              <p className="text-xs text-error-700 dark:text-error-400 font-medium">
-                                Blocked reason: {stepState.notes}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
