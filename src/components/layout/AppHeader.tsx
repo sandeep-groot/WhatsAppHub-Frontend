@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { useTheme } from "@/context/ThemeContext";
+import { ProfileModal } from "@/components/auth/ProfileModal";
+import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 
 const AppHeader: React.FC = () => {
   const { user, logout } = useAuth();
@@ -12,12 +14,14 @@ const AppHeader: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
   const displayName = user?.name || user?.email?.split("@")[0] || "User";
   const roleLabel = user?.roles ? user.roles.join(", ") : "";
-  const displayEmail = user?.email ?? "";
   const avatarLetter = (displayName[0] ?? "U").toUpperCase();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
+
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -29,7 +33,9 @@ const AppHeader: React.FC = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   return (
@@ -143,13 +149,18 @@ const AppHeader: React.FC = () => {
             </button>
             {isUserMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{displayName}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{displayEmail}</p>
-                </div>
                 <ul>
                   <li>
-                    <Link href="#" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 dark:hover:text-emerald-400 transition-colors">Profile</Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        setIsProfileModalOpen(true);
+                      }}
+                      className="w-full text-left block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 dark:hover:text-emerald-400 transition-colors"
+                    >
+                      Profile
+                    </button>
                   </li>
                   <li>
                     <Link href="#" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 dark:hover:text-emerald-400 transition-colors">Settings</Link>
@@ -159,7 +170,7 @@ const AppHeader: React.FC = () => {
                       type="button"
                       onClick={() => {
                         setIsUserMenuOpen(false);
-                        logout();
+                        setIsLogoutConfirmOpen(true);
                       }}
                       className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
@@ -172,6 +183,18 @@ const AppHeader: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Extracted Modals */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
+
+      <LogoutConfirmModal
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={logout}
+      />
     </header>
   );
 };
