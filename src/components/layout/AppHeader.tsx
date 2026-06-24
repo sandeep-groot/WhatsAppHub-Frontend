@@ -152,7 +152,7 @@ const AppHeader: React.FC = () => {
                     <Link href="#" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 dark:hover:text-emerald-400 transition-colors">Profile</Link>
                   </li>
                   <li>
-                    <Link href="#" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 dark:hover:text-emerald-400 transition-colors">Settings</Link>
+                    {/* <Link href="#" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 dark:hover:text-emerald-400 transition-colors">Settings</Link> */}
                   </li>
                   <li className="border-t border-gray-100 dark:border-gray-700">
                     <button
