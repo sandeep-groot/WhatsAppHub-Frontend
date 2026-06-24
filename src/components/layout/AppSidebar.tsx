@@ -44,19 +44,19 @@ const OnboardingIcon = () => (
   </svg>
 );
 
-const UsersIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-    <circle cx="12" cy="8" r="4" />
-    <path d="M4 20c0-4 3.58-7 8-7s8 3 8 7" />
-  </svg>
-);
+// const UsersIcon = () => (
+//   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+//     <circle cx="12" cy="8" r="4" />
+//     <path d="M4 20c0-4 3.58-7 8-7s8 3 8 7" />
+//   </svg>
+// );
 
-const RolesIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-  </svg>
-);
+// const RolesIcon = () => (
+//   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+//     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+//     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+//   </svg>
+// );
 
 const WebhooksIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -115,8 +115,8 @@ const navItems: NavItem[] = [
 ];
 
 const managementItems: NavItem[] = [
-  { name: "Users",      icon: <UsersIcon />,    path: PAGE_ROUTES.USERS },
-  { name: "Roles",      icon: <RolesIcon />,    path: PAGE_ROUTES.ROLES },
+  // { name: "Users",      icon: <UsersIcon />,    path: PAGE_ROUTES.USERS },
+  // { name: "Roles",      icon: <RolesIcon />,    path: PAGE_ROUTES.ROLES },
   { name: "Webhooks",   icon: <WebhooksIcon />, path: PAGE_ROUTES.WEBHOOKS },
   { name: "Audit Logs", icon: <AuditIcon />,    path: PAGE_ROUTES.AUDIT_LOGS },
 ];
@@ -247,7 +247,7 @@ const AppSidebar: React.FC = () => {
 
         {/* Settings pinned at bottom */}
         <div className="px-3 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-          <Link
+          {/* <Link
             href={PAGE_ROUTES.SETTINGS}
             title={!show ? "Settings" : undefined}
             className={`group flex items-center gap-3 px-2 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
@@ -260,7 +260,7 @@ const AppSidebar: React.FC = () => {
               <SettingsIcon />
             </span>
             {show && <span>Settings</span>}
-          </Link>
+          </Link> */}
           <div className={`mt-3 space-y-1 px-2 ${show ? "" : "flex flex-col items-center"}`}>
             {show ? (
               <>
