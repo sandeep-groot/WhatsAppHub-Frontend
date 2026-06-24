@@ -1,26 +1,100 @@
-// UI primitives - modal component example
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: string;
+  size?: "sm" | "md" | "lg" | "xl";
   children: React.ReactNode;
+  showCloseButton?: boolean;
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
-  if (!isOpen) return null;
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  size = "md",
+  children,
+  showCloseButton = true,
+}: ModalProps) {
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-        <h2 className="text-xl font-bold mb-4">{title}</h2>
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !mounted) return null;
+
+  const sizeClasses = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+  };
+
+  return createPortal(
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-all duration-300 cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full ${sizeClasses[size]} mx-4 overflow-hidden transform scale-100 transition-all cursor-default relative`}
+      >
+        {/* Header */}
+        {title && (
+          <div className="px-6 py-4 border-b border-gray-150 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">
+              {title}
+            </h3>
+            {showCloseButton && (
+              <button
+                onClick={onClose}
+                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                aria-label="Close dialog"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Absolute Close Cross Button (if no title is provided but showCloseButton is true) */}
+        {!title && showCloseButton && (
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all z-10"
+            aria-label="Close dialog"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+
+        {/* Body */}
         {children}
-        <button
-          onClick={onClose}
-          className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
-          Close
-        </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
