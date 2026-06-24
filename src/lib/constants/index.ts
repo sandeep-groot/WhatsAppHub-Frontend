@@ -29,6 +29,7 @@ export const PAGE_ROUTES = {
   DATA_DELETION: "/data-deletion",
   DASHBOARD: "/dashboard",
   CLIENTS: "/clients",
+  CONNECTIONS: "/connections",
   ONBOARDING: "/onboarding",
   WEBHOOKS: "/webhook",
   AUDIT_LOGS: "/audit-logs",
