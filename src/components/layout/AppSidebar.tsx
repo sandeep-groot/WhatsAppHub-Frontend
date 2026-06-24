@@ -120,7 +120,7 @@ const ConnectionsIcon = () => (
 const navItems: NavItem[] = [
   { name: "Dashboard", icon: <DashboardIcon />, path: PAGE_ROUTES.DASHBOARD },
   { name: "Clients",   icon: <ClientsIcon />,   path: PAGE_ROUTES.CLIENTS },
-  { name: "Connections", icon: <ConnectionsIcon />, path: PAGE_ROUTES.CONNECTIONS },
+  // { name: "Connections", icon: <ConnectionsIcon />, path: PAGE_ROUTES.CONNECTIONS },
   { name: "Onboarding", icon: <OnboardingIcon />, path: PAGE_ROUTES.ONBOARDING },
 ];
 

@@ -224,7 +224,7 @@ export default function DashboardContent() {
       </div>
 
       {/* Connection Registry Link Card */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+      {/* <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
         <div>
           <h4 className="text-sm font-bold text-gray-900 dark:text-white">Looking for WABA connection details?</h4>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Manage numbers, webhook endpoints, last active timestamps, and connection status filters in the separate Registry console.</p>
@@ -235,7 +235,7 @@ export default function DashboardContent() {
         >
           Open Connection Registry →
         </Link>
-      </div>
+      </div> */}
     </div>
   );
 }
