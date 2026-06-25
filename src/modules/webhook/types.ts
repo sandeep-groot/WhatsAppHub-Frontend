@@ -2,19 +2,40 @@
  * Webhook module - handles webhook management
  */
 
+export type WebhookStatus = "active" | "disabled" | "pending";
+
+export interface EventProperty {
+  event: string;
+  properties: string[];
+}
+
 export interface Webhook {
   id: string;
   url: string;
-  events: string[];
-  active: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  enabledEvents: string[];
+  eventProperties?: EventProperty[];
+  description?: string;
+  status: WebhookStatus;
+  secret?: string; // Appears on create or secret rotate response
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface WebhookEvent {
-  id: string;
-  webhookId: string;
-  type: string;
-  payload: Record<string, unknown>;
-  sentAt: Date;
+export interface CreateWebhookEndpointInput {
+  url: string;
+  enabledEvents: string[];
+  description?: string;
+  status?: WebhookStatus;
+}
+
+export interface UpdateWebhookEndpointInput {
+  url?: string;
+  enabledEvents?: string[];
+  description?: string;
+  status?: WebhookStatus;
+}
+
+export interface ListWebhookEndpointsResponse {
+  data: Webhook[];
+  total?: number;
 }

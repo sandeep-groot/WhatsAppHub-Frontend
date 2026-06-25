@@ -101,12 +101,6 @@ const DeletionIcon = () => (
   </svg>
 );
 
-const SettingsIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-  </svg>
-);
 
 const ConnectionsIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -255,7 +249,7 @@ const AppSidebar: React.FC = () => {
           </div>
         </nav>
 
-        {/* Settings pinned at bottom */}
+        {/* Footer Links pinned at bottom */}
         <div className="px-3 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
           {/* <Link
             href={PAGE_ROUTES.SETTINGS}
@@ -330,20 +324,7 @@ const AppSidebar: React.FC = () => {
           </div>
         </nav>
         <div className="px-3 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-          <Link
-            href={PAGE_ROUTES.SETTINGS}
-            className={`group flex items-center gap-3 px-2 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-              isActive(PAGE_ROUTES.SETTINGS)
-                ? "bg-emerald-50 dark:bg-gray-700 shadow-sm text-emerald-700 dark:text-white"
-                : "text-gray-600 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 dark:hover:text-gray-100"
-            }`}
-          >
-            <span className={`flex items-center justify-center w-9 h-9 rounded-xl shrink-0 ${isActive(PAGE_ROUTES.SETTINGS) ? "bg-emerald-500 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-emerald-100 group-hover:text-emerald-600"}`}>
-              <SettingsIcon />
-            </span>
-            <span>Settings</span>
-          </Link>
-          <div className="mt-3 space-y-1 px-2">
+          <div className="space-y-1 px-2">
             <TermsOfServiceLink className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400" />
             <PrivacyPolicyLink className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400" />
             <DataDeletionLink

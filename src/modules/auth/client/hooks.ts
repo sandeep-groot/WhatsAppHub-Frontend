@@ -7,6 +7,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/query/keys";
+import { apiFetch } from "@/lib/http";
 import type { LoginRequest } from "../types";
 
 export function useLogin() {
@@ -47,5 +48,28 @@ export function useCurrentUser() {
     user,
     isLoading,
     refetch: query.refetch,
+  };
+}
+
+export function useUpdateProfile() {
+  const { refreshUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (data: { firstName: string; lastName: string; email: string }) =>
+      apiFetch("/auth/profile", {
+        method: "PATCH",
+        data,
+      }),
+    onSuccess: async () => {
+      await refreshUser();
+      await queryClient.invalidateQueries({ queryKey: queryKeys.auth.me() });
+    },
+  });
+
+  return {
+    updateProfile: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    error: mutation.error,
   };
 }
