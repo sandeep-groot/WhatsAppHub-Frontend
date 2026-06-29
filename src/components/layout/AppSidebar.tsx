@@ -58,6 +58,13 @@ const OnboardingIcon = () => (
 //   </svg>
 // );
 
+const SendMessageIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <line x1="22" y1="2" x2="11" y2="13" />
+    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </svg>
+);
+
 const WebhooksIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -115,6 +122,7 @@ const navItems: NavItem[] = [
   { name: "Dashboard", icon: <DashboardIcon />, path: PAGE_ROUTES.DASHBOARD },
   { name: "Clients",   icon: <ClientsIcon />,   path: PAGE_ROUTES.CLIENTS },
   // { name: "Connections", icon: <ConnectionsIcon />, path: PAGE_ROUTES.CONNECTIONS },
+  { name: "Send Message", icon: <SendMessageIcon />, path: PAGE_ROUTES.MESSAGES },
   { name: "Onboarding", icon: <OnboardingIcon />, path: PAGE_ROUTES.ONBOARDING },
 ];
 

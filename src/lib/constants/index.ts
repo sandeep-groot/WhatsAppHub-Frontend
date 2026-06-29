@@ -31,6 +31,7 @@ export const PAGE_ROUTES = {
   CLIENTS: "/clients",
   CONNECTIONS: "/connections",
   ONBOARDING: "/onboarding",
+  MESSAGES: "/messages",
   WEBHOOKS: "/webhook",
   AUDIT_LOGS: "/audit-logs",
   USERS: "/users",

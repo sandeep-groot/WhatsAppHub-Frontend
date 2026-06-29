@@ -47,4 +47,12 @@ export const queryKeys = {
     all: ["auditLogs"] as const,
     list: () => [...queryKeys.auditLogs.all, "list"] as const,
   },
+
+  // WhatsApp message queries
+  whatsapp: {
+    all: ["whatsapp"] as const,
+    messages: () => [...queryKeys.whatsapp.all, "messages"] as const,
+    templates: (params?: Record<string, unknown>) =>
+      [...queryKeys.whatsapp.all, "templates", params ?? {}] as const,
+  },
 } as const;
