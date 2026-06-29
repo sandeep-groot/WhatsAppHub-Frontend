@@ -7,6 +7,7 @@ interface SidebarContextType {
   isMobileOpen: boolean;
   toggleSidebar: () => void;
   toggleMobileSidebar: () => void;
+  closeMobileSidebar: () => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -23,6 +24,10 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     setIsMobileOpen((prev) => !prev);
   }, []);
 
+  const closeMobileSidebar = useCallback(() => {
+    setIsMobileOpen(false);
+  }, []);
+
   return (
     <SidebarContext.Provider
       value={{
@@ -30,6 +35,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
         isMobileOpen,
         toggleSidebar,
         toggleMobileSidebar,
+        closeMobileSidebar,
       }}
     >
       {children}

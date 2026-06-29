@@ -52,15 +52,15 @@ export function Modal({
   return createPortal(
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-all duration-300 cursor-pointer"
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm transition-all duration-300 cursor-pointer p-0 sm:items-center sm:p-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full ${sizeClasses[size]} mx-4 overflow-hidden transform scale-100 transition-all cursor-default relative`}
+        className={`bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col overflow-hidden transform scale-100 transition-all cursor-default relative sm:rounded-2xl`}
       >
         {/* Header */}
         {title && (
-          <div className="px-6 py-4 border-b border-gray-150 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
+          <div className="shrink-0 px-6 py-4 border-b border-gray-150 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
             <h3 className="text-base font-bold text-gray-900 dark:text-white">
               {title}
             </h3>
@@ -91,8 +91,10 @@ export function Modal({
           </button>
         )}
 
-        {/* Body */}
-        {children}
+        {/* Body — scrolls independently so actions stay reachable on short screens */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {children}
+        </div>
       </div>
     </div>,
     document.body

@@ -7,6 +7,8 @@ import type {
   CreateWebhookEndpointInput,
   UpdateWebhookEndpointInput,
   Webhook,
+  WebhookEventGroup,
+  ListWebhookEventTypesResponse,
 } from "../types";
 
 export function useWebhookEndpoints() {
@@ -15,6 +17,32 @@ export function useWebhookEndpoints() {
     queryFn: async () => {
       return apiFetch<Webhook[]>("/integrations/ycloud/webhook-endpoints");
     },
+  });
+}
+
+export function useWebhookEventTypes() {
+  return useQuery({
+    queryKey: queryKeys.webhooks.eventTypes(),
+    queryFn: async () => {
+      // apiFetch unwraps { success, data } envelopes automatically via unwrapApiData,
+      // so the resolved value is already WebhookEventGroup[] (not the full envelope)
+      return apiFetch<WebhookEventGroup[]>(
+        "/webhooks/event-types?format=grouped"
+      );
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useWebhookEndpointDetail(id: string | null) {
+  return useQuery({
+    queryKey: queryKeys.webhooks.detail(id ?? ""),
+    queryFn: async () => {
+      return apiFetch<Webhook>(
+        `/integrations/ycloud/webhook-endpoints/${id}`
+      );
+    },
+    enabled: !!id,
   });
 }
 

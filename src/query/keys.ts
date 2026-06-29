@@ -39,6 +39,7 @@ export const queryKeys = {
     all: ["webhooks"] as const,
     list: () => [...queryKeys.webhooks.all, "list"] as const,
     detail: (id: string) => [...queryKeys.webhooks.all, "detail", id] as const,
+    eventTypes: () => [...queryKeys.webhooks.all, "event-types"] as const,
   },
 
   // Audit log queries

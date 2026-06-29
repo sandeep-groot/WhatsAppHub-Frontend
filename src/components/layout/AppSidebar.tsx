@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -126,12 +126,27 @@ const managementItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const { isExpanded, isMobileOpen, toggleSidebar, toggleMobileSidebar, closeMobileSidebar } = useSidebar();
   const pathname = usePathname();
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
   const isActive = (path?: string) => pathname === path;
   const show = isExpanded;
+
+  // Close the mobile drawer whenever the route changes (e.g. after tapping a link)
+  useEffect(() => {
+    closeMobileSidebar();
+  }, [pathname, closeMobileSidebar]);
+
+  // Prevent the page behind the mobile drawer from scrolling while it is open
+  useEffect(() => {
+    if (!isMobileOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [isMobileOpen]);
 
   // Icon box wrapper — gray bg normally, brand blue when active
   const iconBox = (active: boolean) =>

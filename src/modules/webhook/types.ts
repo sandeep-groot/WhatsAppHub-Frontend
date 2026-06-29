@@ -39,3 +39,25 @@ export interface ListWebhookEndpointsResponse {
   data: Webhook[];
   total?: number;
 }
+
+/** A single event entry returned by v1/webhooks/event-types?format=grouped */
+export interface WebhookEventItem {
+  id: string;
+  type: string;
+  label: string;
+  category: string;
+  description: string;
+  isActive: boolean;
+}
+
+/** A category group returned by v1/webhooks/event-types?format=grouped */
+export interface WebhookEventGroup {
+  category: string;
+  events: WebhookEventItem[];
+}
+
+/** Full response envelope from v1/webhooks/event-types?format=grouped */
+export interface ListWebhookEventTypesResponse {
+  success: boolean;
+  data: WebhookEventGroup[];
+}

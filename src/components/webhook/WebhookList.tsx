@@ -12,20 +12,145 @@ interface WebhookListProps {
   onShowSecret: (secret: string, url: string) => void;
 }
 
-export function WebhookList({
-  webhooks,
-  onEdit,
-  onDelete,
-  onShowSecret,
-}: WebhookListProps) {
+// ─── Icons ────────────────────────────────────────────────────────────────────
+
+function CopyIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+function RotateIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m-5 4a5 5 0 01-5-5 5 5 0 015-5 5 5 0 015 5c0 1.22-.44 2.33-1.17 3.17L13 15h4v2h-2v2h-2v-4z" />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+  );
+}
+
+// ─── Status toggle ─────────────────────────────────────────────────────────────
+
+interface StatusToggleProps {
+  webhook: Webhook;
+  loading: boolean;
+  onToggle: () => void;
+}
+
+function StatusToggle({ webhook, loading, onToggle }: StatusToggleProps) {
+  const isActive = webhook.status === "active";
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={onToggle}
+        disabled={loading}
+        aria-label={isActive ? "Disable webhook" : "Enable webhook"}
+        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50 ${
+          isActive ? "bg-emerald-500" : "bg-gray-200 dark:bg-gray-700"
+        }`}
+      >
+        <span
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+            isActive ? "translate-x-4" : "translate-x-0"
+          }`}
+        />
+      </button>
+      <span
+        className={`text-xs font-semibold uppercase tracking-wider ${
+          isActive
+            ? "text-emerald-600 dark:text-emerald-400"
+            : "text-gray-400 dark:text-gray-500"
+        }`}
+      >
+        {isActive ? "Active" : "Disabled"}
+      </span>
+    </div>
+  );
+}
+
+// ─── Action buttons ────────────────────────────────────────────────────────────
+
+interface ActionButtonsProps {
+  webhook: Webhook;
+  copiedId: string | null;
+  onCopy: () => void;
+  onRotate: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function ActionButtons({ webhook, copiedId, onCopy, onRotate, onEdit, onDelete }: ActionButtonsProps) {
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={onCopy}
+        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-xl transition-all"
+        title="Copy URL"
+      >
+        {copiedId === webhook.id ? <CheckIcon /> : <CopyIcon />}
+      </button>
+      <button
+        onClick={onRotate}
+        className="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all"
+        title="Rotate signing secret"
+      >
+        <RotateIcon />
+      </button>
+      <button
+        onClick={onEdit}
+        className="p-2 text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+        title="Edit webhook"
+      >
+        <EditIcon />
+      </button>
+      <button
+        onClick={onDelete}
+        className="p-2 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all"
+        title="Delete webhook"
+      >
+        <TrashIcon />
+      </button>
+    </div>
+  );
+}
+
+// ─── Main component ────────────────────────────────────────────────────────────
+
+export function WebhookList({ webhooks, onEdit, onDelete, onShowSecret }: WebhookListProps) {
   const updateMutation = useUpdateWebhookEndpoint();
   const rotateSecretMutation = useRotateWebhookSecret();
+
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const [rotatingWebhook, setRotatingWebhook] = useState<Webhook | null>(null);
 
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = (url: string, id: string) => {
+    navigator.clipboard.writeText(url);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
@@ -33,12 +158,8 @@ export function WebhookList({
   const handleStatusToggle = async (webhook: Webhook) => {
     const nextStatus = webhook.status === "active" ? "disabled" : "active";
     setLoadingStates((prev) => ({ ...prev, [webhook.id]: true }));
-
     try {
-      await updateMutation.mutateAsync({
-        id: webhook.id,
-        data: { status: nextStatus },
-      });
+      await updateMutation.mutateAsync({ id: webhook.id, data: { status: nextStatus } });
     } catch (err) {
       console.error("Failed to update status", err);
     } finally {
@@ -46,130 +167,157 @@ export function WebhookList({
     }
   };
 
-
+  if (!Array.isArray(webhooks) || webhooks.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Endpoint Details</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Events Subscribed</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-150 dark:divide-gray-700/50">
-            {Array.isArray(webhooks) && webhooks.map((webhook) => (
-              <tr key={webhook.id} className="hover:bg-gray-50/30 dark:hover:bg-gray-700/20 transition-colors">
-                {/* URL and Description */}
-                <td className="px-6 py-4 max-w-sm">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-sm text-gray-900 dark:text-white truncate" title={webhook.url}>
+    <>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+
+        {/* ── Desktop table (md+) ── */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full border-collapse text-left">
+            <thead>
+              <tr className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Endpoint URL
+                </th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Description
+                </th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
+              {webhooks.map((webhook) => (
+                <tr
+                  key={webhook.id}
+                  className="hover:bg-gray-50/30 dark:hover:bg-gray-700/20 transition-colors"
+                >
+                  {/* URL */}
+                  <td className="px-6 py-4 max-w-xs">
+                    <span
+                      className="block font-semibold text-sm text-gray-900 dark:text-white truncate"
+                      title={webhook.url}
+                    >
                       {webhook.url}
                     </span>
-                    <button
-                      onClick={() => handleCopy(webhook.url, webhook.id)}
-                      className="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all"
-                      title="Copy URL"
-                    >
-                      {copiedId === webhook.id ? (
-                        <svg className="w-4 h-4 text-emerald-500 animate-scale" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                  {webhook.description ? (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
-                      {webhook.description}
+                  </td>
+
+                  {/* Description */}
+                  <td className="px-6 py-4 max-w-xs">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                      {webhook.description || <span className="italic text-gray-300 dark:text-gray-600">—</span>}
                     </p>
-                  ) : (
-                    <span className="text-xs text-gray-400 dark:text-gray-500 italic">No description</span>
-                  )}
-                </td>
+                  </td>
 
-                {/* Subscribed Events list */}
-                <td className="px-6 py-4">
-                  <div className="flex flex-wrap gap-1.5 max-w-md">
-                    {Array.isArray(webhook.enabledEvents) && webhook.enabledEvents.map((event) => (
-                      <span
-                        key={event}
-                        className="px-2 py-0.5 text-[10px] font-bold rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/10"
-                      >
-                        {event}
-                      </span>
-                    ))}
-                  </div>
-                </td>
+                  {/* Status */}
+                  <td className="px-6 py-4">
+                    <StatusToggle
+                      webhook={webhook}
+                      loading={!!loadingStates[webhook.id]}
+                      onToggle={() => handleStatusToggle(webhook)}
+                    />
+                  </td>
 
-                {/* Status Switch */}
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => handleStatusToggle(webhook)}
-                      disabled={loadingStates[webhook.id]}
-                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${
-                        webhook.status === "active" ? "bg-emerald-500" : "bg-gray-200 dark:bg-gray-700"
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          webhook.status === "active" ? "translate-x-4" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
-                    <span className={`text-xs font-semibold uppercase tracking-wider ${
-                      webhook.status === "active" ? "text-emerald-600 dark:text-emerald-400" : "text-gray-400 dark:text-gray-500"
-                    }`}>
-                      {webhook.status === "active" ? "Active" : "Disabled"}
-                    </span>
-                  </div>
-                </td>
+                  {/* Actions */}
+                  <td className="px-6 py-4 text-right">
+                    <ActionButtons
+                      webhook={webhook}
+                      copiedId={copiedId}
+                      onCopy={() => handleCopy(webhook.url, webhook.id)}
+                      onRotate={() => setRotatingWebhook(webhook)}
+                      onEdit={() => onEdit(webhook)}
+                      onDelete={() => onDelete(webhook.id)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-                {/* Action buttons */}
-                <td className="px-6 py-4 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <button
-                      onClick={() => setRotatingWebhook(webhook)}
-                      className="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all"
-                      title="Rotate signing secret"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m-5 4a5 5 0 01-5-5 5 5 0 015-5 5 5 0 015 5c0 1.22-.44 2.33-1.17 3.17L13 15h4v2h-2v2h-2v-4z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => onEdit(webhook)}
-                      className="p-2 text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
-                      title="Edit webhook"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => onDelete(webhook.id)}
-                      className="p-2 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all"
-                      title="Delete webhook"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* ── Mobile card list (< md) ── */}
+        <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-700/50">
+          {webhooks.map((webhook) => (
+            <div key={webhook.id} className="p-4 space-y-3">
+
+              {/* URL row */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-0.5">
+                    Endpoint URL
+                  </p>
+                  <p
+                    className="text-sm font-semibold text-gray-900 dark:text-white break-all"
+                    title={webhook.url}
+                  >
+                    {webhook.url}
+                  </p>
+                </div>
+                {/* Copy button inline with URL on mobile */}
+                <button
+                  onClick={() => handleCopy(webhook.url, webhook.id)}
+                  className="p-2 mt-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-xl transition-all shrink-0"
+                  title="Copy URL"
+                >
+                  {copiedId === webhook.id ? <CheckIcon /> : <CopyIcon />}
+                </button>
+              </div>
+
+              {/* Description */}
+              {webhook.description && (
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-0.5">
+                    Description
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    {webhook.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Status + actions row */}
+              <div className="flex items-center justify-between pt-1">
+                <StatusToggle
+                  webhook={webhook}
+                  loading={!!loadingStates[webhook.id]}
+                  onToggle={() => handleStatusToggle(webhook)}
+                />
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setRotatingWebhook(webhook)}
+                    className="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all"
+                    title="Rotate signing secret"
+                  >
+                    <RotateIcon />
+                  </button>
+                  <button
+                    onClick={() => onEdit(webhook)}
+                    className="p-2 text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+                    title="Edit webhook"
+                  >
+                    <EditIcon />
+                  </button>
+                  <button
+                    onClick={() => onDelete(webhook.id)}
+                    className="p-2 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all"
+                    title="Delete webhook"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* Rotate secret confirmation */}
       <ConfirmationModal
         isOpen={!!rotatingWebhook}
         onClose={() => setRotatingWebhook(null)}
@@ -187,6 +335,6 @@ export function WebhookList({
         type="warning"
         showIcon={false}
       />
-    </div>
+    </>
   );
 }
