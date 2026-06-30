@@ -1,23 +1,44 @@
 /**
- * Audit module - handles audit logging and tracking
+ * Audit module - handles audit logging and tracking.
+ * Shapes mirror GET v1/audit-logs.
  */
+
+export interface AuditActor {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
 
 export interface AuditLog {
   id: string;
-  userId: string;
+  actorId: string;
   action: string;
-  resource: string;
-  resourceId: string;
-  changes?: Record<string, unknown>;
-  ipAddress: string;
-  userAgent: string;
-  createdAt: Date;
+  entityType: string;
+  entityId: string;
+  metadata: Record<string, unknown> | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+  actor: AuditActor | null;
 }
 
-export type AuditAction =
-  | "create"
-  | "update"
-  | "delete"
-  | "login"
-  | "logout"
-  | "access";
+export interface AuditLogMeta {
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export interface AuditLogPage {
+  items: AuditLog[];
+  meta: AuditLogMeta;
+}
+
+export interface ListAuditLogsParams {
+  page?: number;
+  limit?: number;
+  actorId?: string;
+  entityType?: string;
+  entityId?: string;
+  action?: string;
+}
