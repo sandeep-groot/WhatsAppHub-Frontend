@@ -16,11 +16,9 @@ interface WhatsAppNumber {
   id: string;
   clientId: string;
   phoneNumber: string;
-  voipProvider: string | null;
   connectionStatus: "PENDING" | "IN_PROGRESS" | "ACTIVE" | "INACTIVE" | "ERROR";
   lastPing: string | null;
   messageCount: number;
-  webhookUrl: string | null;
   client: {
     id: string;
     name: string;
@@ -204,7 +202,6 @@ export default function ConnectionsPage() {
                     </div>
                   </th>
                   <th scope="col" className="px-6 py-4">WhatsApp Number</th>
-                  <th scope="col" className="px-6 py-4">Webhook Endpoint</th>
                   <th scope="col" className="px-6 py-4">Status</th>
                   <th
                     scope="col"
@@ -249,9 +246,6 @@ export default function ConnectionsPage() {
                       </td>
                       <td className="px-6 py-4 font-mono text-xs">
                         {num.phoneNumber}
-                      </td>
-                      <td className="px-6 py-4 text-xs font-mono max-w-[200px] truncate" title={num.webhookUrl || "Platform Webhook Receiver"}>
-                        {num.webhookUrl || "Platform Default"}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-bold rounded-lg ${statusBadge}`}>
