@@ -10,7 +10,6 @@ interface WhatsAppNumber {
   id: string;
   clientId: string;
   phoneNumber: string;
-  voipProvider: string | null;
   connectionStatus: "PENDING" | "IN_PROGRESS" | "ACTIVE" | "INACTIVE" | "ERROR";
   lastPing: string | null;
   messageCount: number;

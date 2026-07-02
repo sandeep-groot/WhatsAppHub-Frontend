@@ -4,7 +4,6 @@ import React, { useMemo, useState, Suspense, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/http";
 import Link from "next/link";
-import { mockWabaPage, mockPhonePage } from "./clients.mock";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                     */
@@ -223,26 +222,13 @@ function ClientsContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedBusiness, setExpandedBusiness] = useState<Record<string, boolean>>({});
   const [drawerBusinessId, setDrawerBusinessId] = useState<string | null>(null);
-  const [testMode, setTestMode] = useState(false);
-
-  useEffect(() => {
-    setTestMode(localStorage.getItem("clientsTestMode") === "true");
-  }, []);
-
-  const toggleTestMode = () => {
-    setTestMode((prev) => {
-      const next = !prev;
-      localStorage.setItem("clientsTestMode", String(next));
-      return next;
-    });
-  };
+  const [consoleNumber, setConsoleNumber] = useState<PhoneNumber | null>(null);
 
   const { data: wabaData, isLoading: wabasLoading } = useQuery<PagedResponse<WabaAccount>>({
     queryKey: ["ycloud", "business-accounts"],
     queryFn: async () =>
       apiFetch<PagedResponse<WabaAccount>>("/integrations/ycloud/whatsapp/business-accounts"),
     refetchInterval: 30000,
-    enabled: !testMode,
   });
 
   const { data: phoneData, isLoading: phonesLoading } = useQuery<PagedResponse<PhoneNumber>>({
@@ -252,12 +238,11 @@ function ClientsContent() {
         "/integrations/ycloud/whatsapp/phone-numbers?page=1&limit=10&includeTotal=false"
       ),
     refetchInterval: 30000,
-    enabled: !testMode,
   });
 
-  const wabaPage = testMode ? mockWabaPage : wabaData;
-  const phonePage = testMode ? mockPhonePage : phoneData;
-  const isLoading = !testMode && (wabasLoading || phonesLoading);
+  const wabaPage = wabaData;
+  const phonePage = phoneData;
+  const isLoading = wabasLoading || phonesLoading;
 
   const businesses = useMemo(
     () => buildHierarchy(wabaPage?.items ?? [], phonePage?.items ?? []),
@@ -318,16 +303,6 @@ function ClientsContent() {
           + Connect New WABA
         </Link>
       </div>
-      <button
-        onClick={toggleTestMode}
-        className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors ${testMode
-            ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400"
-            : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-emerald-300"
-          }`}
-      >
-        <span className={`h-1.5 w-1.5 rounded-full ${testMode ? "bg-amber-500 animate-pulse" : "bg-gray-400"}`} />
-        {testMode ? "Test Mode: ON" : "Test Mode: OFF"}
-      </button>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -393,6 +368,7 @@ function ClientsContent() {
               open={expandedBusiness[business.businessId] ?? true}
               onToggle={() => toggleBusiness(business.businessId)}
               onViewDetails={() => setDrawerBusinessId(business.businessId)}
+              onOpenConsole={(phone) => setConsoleNumber(phone)}
             />
           ))}
         </div>
@@ -400,7 +376,19 @@ function ClientsContent() {
 
       {/* Details Drawer */}
       {drawerBusiness && (
-        <DetailsDrawer business={drawerBusiness} onClose={() => setDrawerBusinessId(null)} />
+        <DetailsDrawer 
+          business={drawerBusiness} 
+          onClose={() => setDrawerBusinessId(null)}
+          onOpenConsole={(phone) => setConsoleNumber(phone)}
+        />
+      )}
+
+      {/* Console Drawer */}
+      {consoleNumber && (
+        <ConsoleDrawer
+          phone={consoleNumber}
+          onClose={() => setConsoleNumber(null)}
+        />
       )}
     </div>
   );
@@ -415,11 +403,13 @@ function BusinessTableCard({
   open,
   onToggle,
   onViewDetails,
+  onOpenConsole,
 }: {
   business: BusinessNode;
   open: boolean;
   onToggle: () => void;
   onViewDetails: () => void;
+  onOpenConsole: (phone: PhoneNumber) => void;
 }) {
   const verified = business.businessVerificationStatus?.toLowerCase() === "verified";
 
@@ -427,7 +417,7 @@ function BusinessTableCard({
     <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
       {/* Business header — spread across full width */}
       <div className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
-        <button onClick={onToggle} className="flex flex-1 items-center gap-3 text-left">
+        <div onClick={onToggle} className="flex flex-1 items-center gap-3 text-left cursor-pointer select-none">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m4-14h2m-2 4h2m4-4h2m-2 4h2" />
@@ -449,7 +439,7 @@ function BusinessTableCard({
               <CopyableId value={business.businessId} label="Business ID" />
             </div>
           </div>
-        </button>
+        </div>
 
         {/* Right cluster: summary + action, pushed to far right */}
         <div className="flex items-center gap-3 lg:justify-end">
@@ -482,6 +472,7 @@ function BusinessTableCard({
                 <th scope="col" className="px-5 py-3 w-[20%]">WABA ID</th>
                 <th scope="col" className="px-5 py-3 w-[20%]">Phone Number</th>
                 <th scope="col" className="px-5 py-3 text-center">Connection</th>
+                <th scope="col" className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -541,6 +532,20 @@ function BusinessTableCard({
                         <span className="text-gray-300 dark:text-gray-600">—</span>
                       )}
                     </td>
+
+                    {/* Actions */}
+                    <td className="px-5 py-3 text-right">
+                      {phone ? (
+                        <button
+                          onClick={() => onOpenConsole(phone)}
+                          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500/30 hover:bg-emerald-50/20 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                        >
+                          Console
+                        </button>
+                      ) : (
+                        <span className="text-gray-300 dark:text-gray-600">—</span>
+                      )}
+                    </td>
                   </tr>
                 ));
               })}
@@ -556,7 +561,15 @@ function BusinessTableCard({
 /*                               Details Drawer                               */
 /* -------------------------------------------------------------------------- */
 
-function DetailsDrawer({ business, onClose }: { business: BusinessNode; onClose: () => void }) {
+function DetailsDrawer({
+  business,
+  onClose,
+  onOpenConsole,
+}: {
+  business: BusinessNode;
+  onClose: () => void;
+  onOpenConsole: (phone: PhoneNumber) => void;
+}) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} aria-hidden />
@@ -607,7 +620,7 @@ function DetailsDrawer({ business, onClose }: { business: BusinessNode; onClose:
               </div>
 
               <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mt-4 mb-2">Phone Numbers</p>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {waba.phoneNumbers.length === 0 ? (
                   <p className="text-[11px] text-gray-400">No phone numbers registered.</p>
                 ) : (
@@ -617,21 +630,34 @@ function DetailsDrawer({ business, onClose }: { business: BusinessNode; onClose:
                     return (
                       <div
                         key={phone.id}
-                        className="flex items-center justify-between gap-2 rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-2"
+                        className="flex flex-col gap-2 rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 shadow-sm"
                       >
-                        <span className="inline-flex items-center gap-1.5 min-w-0">
-                          <span className="font-mono text-sm font-semibold text-gray-900 dark:text-white truncate">{phone.displayPhoneNumber}</span>
-                          <CopyButton value={phone.displayPhoneNumber} label="phone number" />
-                        </span>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400">
-                            <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
-                            {s.label}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-1.5 min-w-0">
+                            <span className="font-mono text-sm font-semibold text-gray-900 dark:text-white truncate">{phone.displayPhoneNumber}</span>
+                            <CopyButton value={phone.displayPhoneNumber} label="phone number" />
                           </span>
-                          <span className="text-gray-300 dark:text-gray-600">•</span>
-                          <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${q.text}`}>
-                            {q.label} Quality
-                          </span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400">
+                              <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+                              {s.label}
+                            </span>
+                            <span className="text-gray-300 dark:text-gray-600">•</span>
+                            <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${q.text}`}>
+                              {q.label} Quality
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex justify-end border-t border-gray-50 dark:border-gray-800/40 pt-2 mt-1">
+                          <button
+                            onClick={() => {
+                              onClose();
+                              onOpenConsole(phone);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500/30 hover:bg-emerald-50/20 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                          >
+                            Open Console
+                          </button>
                         </div>
                       </div>
                     );
@@ -640,6 +666,274 @@ function DetailsDrawer({ business, onClose }: { business: BusinessNode; onClose:
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               Console Drawer                               */
+/* -------------------------------------------------------------------------- */
+
+interface CustomerRecord {
+  customerNumber: string;
+  customerName: string | null;
+}
+
+interface MessageRecord {
+  id: string;
+  wamid: string | null;
+  customerNumber: string;
+  customerName: string | null;
+  direction: "INBOUND" | "OUTBOUND";
+  messageType: string | null;
+  messageText: string | null;
+  status: string;
+  sendTime: string | null;
+  createdOn: string;
+}
+
+function ConsoleDrawer({
+  phone,
+  onClose,
+}: {
+  phone: PhoneNumber;
+  onClose: () => void;
+}) {
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const [customerSearch, setCustomerSearch] = useState("");
+
+  // Query unique customers from database
+  const { data: customers, isLoading: loadingCustomers } = useQuery<CustomerRecord[]>({
+    queryKey: ["whatsapp", "customers", phone.id],
+    queryFn: () => apiFetch<CustomerRecord[]>(`/whatsapp/numbers/${phone.id}/customers`),
+    refetchInterval: 10000,
+  });
+
+  // Query logs for active customer connection
+  const { data: messages, isLoading: loadingMessages } = useQuery<MessageRecord[]>({
+    queryKey: ["whatsapp", "messages", phone.id, selectedCustomer],
+    queryFn: () =>
+      apiFetch<MessageRecord[]>(
+        `/whatsapp/numbers/${phone.id}/messages?customerNumber=${encodeURIComponent(
+          selectedCustomer || ""
+        )}`
+      ),
+    enabled: !!selectedCustomer,
+    refetchInterval: 5000,
+  });
+
+  const filteredCustomers = useMemo(() => {
+    if (!customers) return [];
+    const q = customerSearch.trim().toLowerCase();
+    if (!q) return customers;
+    return customers.filter(
+      (c) =>
+        c.customerNumber.toLowerCase().includes(q) ||
+        (c.customerName && c.customerName.toLowerCase().includes(q))
+    );
+  }, [customers, customerSearch]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+        aria-hidden
+      />
+      {/* Panel */}
+      <div className="relative h-full w-full max-w-4xl bg-white dark:bg-gray-900 shadow-2xl flex flex-col animate-slide-in-right">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              WhatsApp Message Console
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Monitoring line: <span className="font-mono font-semibold">{phone.displayPhoneNumber}</span>
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            aria-label="Close"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content split panel */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left panel: Customers list */}
+          <div className="w-[35%] border-r border-gray-100 dark:border-gray-800 flex flex-col bg-gray-50/50 dark:bg-gray-950/20">
+            {/* Search */}
+            <div className="p-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search customers..."
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+                />
+                <svg
+                  className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+              {loadingCustomers ? (
+                <div className="flex flex-col gap-2 p-3">
+                  <div className="h-10 w-full animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+                  <div className="h-10 w-full animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+                </div>
+              ) : filteredCustomers.length === 0 ? (
+                <div className="text-center py-10 px-3 text-xs text-gray-400">
+                  No active customers found.
+                </div>
+              ) : (
+                filteredCustomers.map((customer) => {
+                  const isActive = selectedCustomer === customer.customerNumber;
+                  return (
+                    <button
+                      key={customer.customerNumber}
+                      onClick={() => setSelectedCustomer(customer.customerNumber)}
+                      className={`w-full flex flex-col text-left px-3 py-2.5 rounded-xl transition-all duration-150 ${
+                        isActive
+                          ? "bg-emerald-500 text-white shadow-sm"
+                          : "hover:bg-gray-100/70 dark:hover:bg-gray-800/40 text-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      <span className="font-semibold text-xs truncate">
+                        {customer.customerName || "Unknown Customer"}
+                      </span>
+                      <span
+                        className={`font-mono text-[10px] mt-0.5 ${
+                          isActive ? "text-emerald-100" : "text-gray-400"
+                        }`}
+                      >
+                        {customer.customerNumber}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Right panel: Timeline */}
+          <div className="w-[65%] flex flex-col bg-white dark:bg-gray-900">
+            {selectedCustomer ? (
+              <>
+                {/* Chat header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
+                  <div>
+                    <h3 className="font-bold text-xs text-gray-900 dark:text-white">
+                      {customers?.find((c) => c.customerNumber === selectedCustomer)?.customerName ||
+                        "Unknown"}
+                    </h3>
+                    <p className="font-mono text-[10px] text-gray-400 mt-0.5">{selectedCustomer}</p>
+                  </div>
+                  <CopyButton value={selectedCustomer} label="customer number" />
+                </div>
+
+                {/* Chat logs */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30 dark:bg-gray-950/5">
+                  {loadingMessages && !messages ? (
+                    <div className="flex flex-col gap-3 py-4">
+                      <div className="h-12 w-2/3 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+                      <div className="h-12 w-2/3 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse align-self-end ml-auto" />
+                    </div>
+                  ) : messages?.length === 0 ? (
+                    <div className="text-center py-20 text-xs text-gray-400">
+                      No logs found for this conversation.
+                    </div>
+                  ) : (
+                    messages?.map((msg) => {
+                      const isOutbound = msg.direction === "OUTBOUND";
+                      const time = new Date(msg.createdOn).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
+                      const date = new Date(msg.createdOn).toLocaleDateString([], {
+                        month: "short",
+                        day: "numeric",
+                      });
+
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex flex-col max-w-[80%] ${
+                            isOutbound ? "ml-auto items-end" : "mr-auto items-start"
+                          }`}
+                        >
+                          <div
+                            className={`px-3.5 py-2.5 rounded-2xl shadow-sm text-xs leading-relaxed ${
+                              isOutbound
+                                ? "bg-emerald-500 text-white rounded-tr-none"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 rounded-tl-none"
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap">{msg.messageText}</p>
+                          </div>
+                          <span className="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
+                            <span>{date}, {time}</span>
+                            {isOutbound && (
+                              <span className="flex items-center">
+                                {msg.status === "READ" ? (
+                                  <svg className="h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7m-12 0l4 4L19 7" />
+                                  </svg>
+                                ) : msg.status === "DELIVERED" ? (
+                                  <svg className="h-3 w-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7m-12 0l4 4L19 7" />
+                                  </svg>
+                                ) : (
+                                  <svg className="h-3 w-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-gray-400">
+                <svg
+                  className="h-10 w-10 text-gray-300 mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+                <p className="text-xs">Select a customer connection on the left to view message logs.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
