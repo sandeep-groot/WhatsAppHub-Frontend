@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/query/keys";
 import { apiFetch } from "@/lib/http";
-import { mockPhonePage, mockWabaPage } from "../mock";
 import type { BusinessNode, PagedResponse, PhoneNumber, WabaAccount } from "../types";
 import { buildBusinessHierarchy, computeAccountKpis } from "../utils";
 
@@ -36,8 +35,6 @@ export function useYCloudPhoneNumbers(options?: { enabled?: boolean }) {
 
 export interface UseYCloudAccountsOptions {
   enabled?: boolean;
-  /** When true, returns mock data instead of calling the API. */
-  testMode?: boolean;
 }
 
 /**
@@ -45,14 +42,14 @@ export interface UseYCloudAccountsOptions {
  * Builds the business hierarchy and KPI totals used on Dashboard and Clients.
  */
 export function useYCloudAccounts(options: UseYCloudAccountsOptions = {}) {
-  const { enabled = true, testMode = false } = options;
-  const queriesEnabled = enabled && !testMode;
+  const { enabled = true } = options;
+  const queriesEnabled = enabled;
 
   const businessQuery = useYCloudBusinessAccounts({ enabled: queriesEnabled });
   const phoneQuery = useYCloudPhoneNumbers({ enabled: queriesEnabled });
 
-  const wabaPage = testMode ? mockWabaPage : businessQuery.data;
-  const phonePage = testMode ? mockPhonePage : phoneQuery.data;
+  const wabaPage = businessQuery.data;
+  const phonePage = phoneQuery.data;
 
   const businesses = useMemo<BusinessNode[]>(
     () => buildBusinessHierarchy(wabaPage?.items ?? [], phonePage?.items ?? []),
@@ -62,11 +59,11 @@ export function useYCloudAccounts(options: UseYCloudAccountsOptions = {}) {
   const kpis = useMemo(() => computeAccountKpis(businesses), [businesses]);
 
   const isLoading =
-    !testMode && (businessQuery.isLoading || phoneQuery.isLoading);
+    businessQuery.isLoading || phoneQuery.isLoading;
   const isFetching =
-    !testMode && (businessQuery.isFetching || phoneQuery.isFetching);
+    businessQuery.isFetching || phoneQuery.isFetching;
   const isError =
-    !testMode && (businessQuery.isError || phoneQuery.isError);
+    businessQuery.isError || phoneQuery.isError;
   const error = businessQuery.error ?? phoneQuery.error;
 
   const refetch = () => {
