@@ -1,7 +1,4 @@
-import type { WabaAccount, PhoneNumber, PagedResponse } from "./page";
-
-// NOTE: export the interfaces from page.tsx (add `export` to them) so this file can reuse them,
-// or copy the type shapes here if you prefer to keep page.tsx untouched.
+import type { PagedResponse, PhoneNumber, WabaAccount } from "./types";
 
 export const mockWabaPage: PagedResponse<WabaAccount> = {
   offset: 0,
@@ -67,7 +64,6 @@ export const mockPhonePage: PagedResponse<PhoneNumber> = {
   limit: 10,
   length: 5,
   items: [
-    // WABA "Support" -> 2 numbers (demonstrates multi-number arrangement)
     {
       id: "1140615095809542",
       phoneNumber: "+17174300078",
@@ -104,7 +100,6 @@ export const mockPhonePage: PagedResponse<PhoneNumber> = {
       requestedVerifiedName: "Support Backup",
       isOnBizApp: false,
     },
-    // WABA "Saffron Market" -> 1 number
     {
       id: "1192439530612497",
       phoneNumber: "+15559107968",
@@ -125,7 +120,6 @@ export const mockPhonePage: PagedResponse<PhoneNumber> = {
       rejectionReason: "BIZ_COMMERCE_VIOLATION_OTHER",
       isOnBizApp: false,
     },
-    // WABA "Acme Sales" -> 2 numbers (second business, also multi-number)
     {
       id: "2233445566778899",
       phoneNumber: "+442079460001",

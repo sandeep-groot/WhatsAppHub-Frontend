@@ -1,241 +1,229 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
-import { apiFetch } from "@/lib/http";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import React from "react";
+import Link from "next/link";
+import { AccountsKpiCards } from "@/components/clients/AccountsKpiCards";
+import { useSystemHealth } from "@/modules/health/client/hooks";
+import { useYCloudAccounts } from "@/modules/clients/client/hooks";
+import type { HealthCheckResult } from "@/modules/health/types";
+import { PAGE_ROUTES } from "@/lib/constants";
 
-interface WhatsAppNumber {
-  id: string;
-  clientId: string;
-  phoneNumber: string;
-  voipProvider: string | null;
-  connectionStatus: "PENDING" | "IN_PROGRESS" | "ACTIVE" | "INACTIVE" | "ERROR";
-  lastPing: string | null;
-  messageCount: number;
-  client: {
-    id: string;
-    name: string;
-  };
+/* ── Status helpers ───────────────────────────────────────────────────────── */
+
+type StatusLevel = "ok" | "degraded" | "down" | "loading";
+
+function statusLevel(
+  result: HealthCheckResult | null | undefined,
+  unreachable: boolean
+): StatusLevel {
+  if (unreachable && !result) return "down";
+  if (!result) return "loading";
+  if (!result.ok) return "down";
+  if (result.data?.status === "degraded") return "degraded";
+  if (result.data?.status === "ok") return "ok";
+  return "degraded";
 }
 
-interface ClientRecord {
-  id: string;
-  name: string;
-  status: string;
-  createdAt: string;
-  numbers: WhatsAppNumber[];
+const STATUS_STYLES: Record<
+  StatusLevel,
+  { dot: string; badge: string; label: string }
+> = {
+  ok: {
+    dot: "bg-emerald-500",
+    badge:
+      "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20",
+    label: "Healthy",
+  },
+  degraded: {
+    dot: "bg-amber-500",
+    badge:
+      "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20",
+    label: "Degraded",
+  },
+  down: {
+    dot: "bg-rose-500",
+    badge:
+      "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20",
+    label: "Down",
+  },
+  loading: {
+    dot: "bg-gray-300 dark:bg-gray-600",
+    badge:
+      "bg-gray-50 text-gray-500 border-gray-200 dark:bg-gray-700/50 dark:text-gray-400 dark:border-gray-600",
+    label: "Checking…",
+  },
+};
+
+function StatusBadge({ level }: { level: StatusLevel }) {
+  const s = STATUS_STYLES[level];
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${s.badge}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+      {s.label}
+    </span>
+  );
 }
 
-export default function DashboardContent() {
-  const { user, isLoading: isAuthLoading } = useAuth();
+interface EndpointCardProps {
+  title: string;
+  result: HealthCheckResult | null | undefined;
+  unreachable: boolean;
+  showDatabase?: boolean;
+}
 
-  // Query WABA numbers
-  const { data: numbers, isLoading: isNumbersLoading } = useQuery<WhatsAppNumber[]>({
-    queryKey: ["whatsapp", "numbers"],
-    queryFn: async () => {
-      return apiFetch<WhatsAppNumber[]>("/whatsapp/numbers");
-    },
-    refetchInterval: 10000,
-  });
-
-  // Query clients
-  const { data: clients, isLoading: isClientsLoading } = useQuery<ClientRecord[]>({
-    queryKey: ["whatsapp", "clients"],
-    queryFn: async () => {
-      return apiFetch<ClientRecord[]>("/whatsapp/clients");
-    },
-    refetchInterval: 10000,
-  });
-
-  if (isAuthLoading || isNumbersLoading || isClientsLoading) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Loading operational overview...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  // Compute Client Stats
-  const totalClients = clients?.length || 0;
-  const activeClients = clients?.filter((c) => c.status === "ACTIVE").length || 0;
-  const inactiveClients = totalClients - activeClients;
-
-  // Compute Webhook / Connection Stats
-  const totalWebhooks = numbers?.length || 0;
-  const activeWebhooks = numbers?.filter((n) => n.connectionStatus === "ACTIVE").length || 0;
-  const inactiveWebhooks = totalWebhooks - activeWebhooks;
-
-  // Key business KPIs
-  const totalMessages = numbers?.reduce((acc, curr) => acc + curr.messageCount, 0) || 0;
+function EndpointCard({
+  title,
+  result,
+  unreachable,
+  showDatabase = false,
+}: EndpointCardProps) {
+  const level = statusLevel(result, unreachable);
+  const data = result?.data;
 
   return (
-    <div className="space-y-8 animate-fade-in pt-2">
-      {/* Top Banner / Welcome Info */}
-      <div className="flex flex-col gap-1 border-b border-gray-100 dark:border-gray-800 pb-4">
-        <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-          Executive Control Panel
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          High-level operational stats, client directory distribution, and channel webhook delivery metrics.
-        </p>
-      </div>
-      {/* SECTION 1: Client Metrics */}
-      <div className="space-y-4">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-          Client Profiles Overview
-        </h2>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          {/* Card: Total Clients */}
-          <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-5 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total Clients</p>
-                <h4 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{totalClients}</h4>
-              </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Registered Client Accounts</p>
-            </div>
-          </div>
-
-          {/* Card: Active Clients */}
-          <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-5 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Active Clients</p>
-                <h4 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{activeClients}</h4>
-              </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Functional Status ACTIVE</p>
-            </div>
-          </div>
-
-          {/* Card: Inactive Clients */}
-          <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-5 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Inactive Clients</p>
-                <h4 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{inactiveClients}</h4>
-              </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-500/10 text-gray-500 dark:text-gray-400">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Disabled or offline accounts</p>
-            </div>
-          </div>
-        </div>
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-sm font-bold text-gray-900 dark:text-white">{title}</h3>
+        <StatusBadge level={level} />
       </div>
 
-      {/* SECTION 2: Webhook / Channel Metrics */}
-      <div className="space-y-4">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-          Webhook Integrations & Channels
-        </h2>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          {/* Card: Total Webhooks */}
-          <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-5 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total Webhooks</p>
-                <h4 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{totalWebhooks}</h4>
-              </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Registered WABA connections</p>
-            </div>
+      {showDatabase && data?.checks?.database && (
+        <dl className="mt-4 text-xs">
+          <div className="flex justify-between gap-4">
+            <dt className="text-gray-400 dark:text-gray-500 font-medium">Database</dt>
+            <dd
+              className={`font-mono font-semibold ${
+                data.checks.database === "up"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-rose-600 dark:text-rose-400"
+              }`}
+            >
+              {data.checks.database}
+            </dd>
           </div>
+        </dl>
+      )}
+    </div>
+  );
+}
 
-          {/* Card: Active Webhooks */}
-          <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-5 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Active Webhooks</p>
-                <h4 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{activeWebhooks}</h4>
-              </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-success-50 dark:bg-success-500/10 text-success-600 dark:text-success-400">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-success-500" />
-              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Receiving active payloads</p>
-            </div>
-          </div>
+/* ── Dashboard ────────────────────────────────────────────────────────────── */
 
-          {/* Card: Inactive Webhooks */}
-          <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-5 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Inactive Webhooks</p>
-                <h4 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{inactiveWebhooks}</h4>
-              </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-error-50 dark:bg-error-500/10 text-error-600 dark:text-error-400">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="15" y1="9" x2="9" y2="15" />
-                  <line x1="9" y1="9" x2="15" y2="15" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${inactiveWebhooks > 0 ? "bg-error-500 animate-pulse" : "bg-gray-300"}`} />
-              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Offline or pending steps</p>
-            </div>
-          </div>
-        </div>
-      </div>
+export default function DashboardContent() {
+  const { data, isLoading, isFetching, refetch } = useSystemHealth();
+  const {
+    kpis,
+    isLoading: accountsLoading,
+    isFetching: accountsFetching,
+    refetch: refetchAccounts,
+  } = useYCloudAccounts();
 
-      {/* Connection Registry Link Card */}
-      {/* <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+  const unreachable = data?.unreachable ?? false;
+  const summaryLevel = isLoading
+    ? "loading"
+    : unreachable
+      ? "down"
+      : data?.summary?.data?.status === "ok"
+        ? data.ready?.ok
+          ? "ok"
+          : "degraded"
+        : "degraded";
+
+  const overallStyles = STATUS_STYLES[summaryLevel];
+  const refreshing = isFetching || accountsFetching;
+
+  const handleRefreshAll = () => {
+    refetch();
+    refetchAccounts();
+  };
+
+  return (
+    <div className="space-y-8 max-w-5xl mx-auto">
+      {/* Page header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h4 className="text-sm font-bold text-gray-900 dark:text-white">Looking for WABA connection details?</h4>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Manage numbers, webhook endpoints, last active timestamps, and connection status filters in the separate Registry console.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Backend health and WhatsApp account overview. Auto-refreshes every 30 seconds.
+          </p>
         </div>
-        <Link
-          href="/connections"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs transition-all shadow-sm hover:scale-[1.01]"
+        <button
+          type="button"
+          onClick={handleRefreshAll}
+          disabled={refreshing}
+          className="px-4 py-2 text-sm font-semibold rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50 flex items-center gap-2 self-start"
         >
-          Open Connection Registry →
-        </Link>
-      </div> */}
+          {refreshing ? (
+            <div className="w-4 h-4 border-2 border-gray-300 border-t-emerald-500 rounded-full animate-spin" />
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          )}
+          Refresh
+        </button>
+      </div>
+
+      {/* System health */}
+      <section className="space-y-4">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+          System Status
+        </h2>
+        <div className={`rounded-2xl border p-5 ${overallStyles.badge} border-current/20`}>
+          <div className="flex items-center gap-3 mb-5">
+            <div
+              className={`w-3 h-3 rounded-full shrink-0 ${overallStyles.dot} ${
+                summaryLevel === "ok" ? "animate-pulse" : ""
+              }`}
+            />
+            <p className="font-bold text-base">
+              {summaryLevel === "loading" && "Checking backend health…"}
+              {summaryLevel === "ok" && "All systems operational"}
+              {summaryLevel === "degraded" && "System degraded — database or readiness issue"}
+              {summaryLevel === "down" && "Backend unreachable"}
+            </p>
+          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 animate-pulse h-24"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <EndpointCard title="Liveness" result={data?.live} unreachable={unreachable} />
+              <EndpointCard
+                title="Readiness"
+                result={data?.ready}
+                unreachable={unreachable}
+                showDatabase
+              />
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* WhatsApp accounts KPIs */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            WhatsApp Accounts
+          </h2>
+          <Link
+            href={PAGE_ROUTES.CLIENTS}
+            className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+          >
+            View all clients →
+          </Link>
+        </div>
+        <AccountsKpiCards kpis={kpis} isLoading={accountsLoading} />
+      </section>
     </div>
   );
 }

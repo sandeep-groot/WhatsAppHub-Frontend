@@ -18,6 +18,10 @@ export const queryKeys = {
     all: ["clients"] as const,
     list: () => [...queryKeys.clients.all, "list"] as const,
     detail: (id: string) => [...queryKeys.clients.all, "detail", id] as const,
+    ycloudBusinessAccounts: () =>
+      [...queryKeys.clients.all, "ycloud", "business-accounts"] as const,
+    ycloudPhoneNumbers: () =>
+      [...queryKeys.clients.all, "ycloud", "phone-numbers"] as const,
   },
 
   // User queries
@@ -55,5 +59,11 @@ export const queryKeys = {
     messages: () => [...queryKeys.whatsapp.all, "messages"] as const,
     templates: (params?: Record<string, unknown>) =>
       [...queryKeys.whatsapp.all, "templates", params ?? {}] as const,
+  },
+
+  // Backend health queries
+  health: {
+    all: ["health"] as const,
+    system: () => [...queryKeys.health.all, "system"] as const,
   },
 } as const;

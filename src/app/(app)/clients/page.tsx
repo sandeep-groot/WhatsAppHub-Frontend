@@ -1,74 +1,10 @@
 "use client";
 
 import React, { useMemo, useState, Suspense, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/http";
 import Link from "next/link";
-import { mockWabaPage, mockPhonePage } from "./clients.mock";
-
-/* -------------------------------------------------------------------------- */
-/*                                   Types                                     */
-/* -------------------------------------------------------------------------- */
-
-export interface WabaAccount {
-  id: string;
-  name: string;
-  currency: string;
-  messageTemplateNamespace: string;
-  accountReviewStatus: string;
-  businessId: string;
-  businessStatus: string;
-  businessName: string;
-  businessVerificationStatus: string;
-  whatsappBusinessManagerMessagingLimit: string;
-  ownershipType: string;
-  primaryFundingId: string;
-  timezoneId: string;
-  paymentMethodAttached: boolean;
-  isOnBizApp: boolean;
-}
-
-export interface PhoneNumber {
-  id: string;
-  phoneNumber: string;
-  wabaId: string;
-  verifiedName: string;
-  qualityRating: string;
-  messagingLimit: string;
-  whatsappBusinessManagerMessagingLimit: string;
-  isOfficialBusinessAccount: boolean;
-  codeVerificationStatus: string;
-  status: string;
-  displayPhoneNumber: string;
-  nameStatus: string;
-  newName?: string;
-  newNameStatus: string;
-  decision: string;
-  requestedVerifiedName: string;
-  rejectionReason?: string;
-  isOnBizApp: boolean;
-}
-
-export interface PagedResponse<T> {
-  offset: number;
-  limit: number;
-  length: number;
-  items: T[];
-}
-
-/* Derived hierarchy */
-interface WabaNode extends WabaAccount {
-  phoneNumbers: PhoneNumber[];
-}
-
-interface BusinessNode {
-  businessId: string;
-  businessName: string;
-  businessStatus: string;
-  businessVerificationStatus: string;
-  wabas: WabaNode[];
-  phoneCount: number;
-}
+import { AccountsKpiCards } from "@/components/clients/AccountsKpiCards";
+import { useYCloudAccounts } from "@/modules/clients/client/hooks";
+import type { BusinessNode } from "@/modules/clients/types";
 
 /* -------------------------------------------------------------------------- */
 /*                                  Helpers                                    */
@@ -185,37 +121,6 @@ function CopyableId({ value, label }: { value: string; label?: string }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                              Data Aggregation                              */
-/* -------------------------------------------------------------------------- */
-
-function buildHierarchy(wabas: WabaAccount[], phones: PhoneNumber[]): BusinessNode[] {
-  const phonesByWaba = new Map<string, PhoneNumber[]>();
-  for (const phone of phones) {
-    const list = phonesByWaba.get(phone.wabaId) ?? [];
-    list.push(phone);
-    phonesByWaba.set(phone.wabaId, list);
-  }
-
-  const businessMap = new Map<string, BusinessNode>();
-  for (const waba of wabas) {
-    const node = businessMap.get(waba.businessId) ?? {
-      businessId: waba.businessId,
-      businessName: waba.businessName,
-      businessStatus: waba.businessStatus,
-      businessVerificationStatus: waba.businessVerificationStatus,
-      wabas: [],
-      phoneCount: 0,
-    };
-    const phoneNumbers = phonesByWaba.get(waba.id) ?? [];
-    node.wabas.push({ ...waba, phoneNumbers });
-    node.phoneCount += phoneNumbers.length;
-    businessMap.set(waba.businessId, node);
-  }
-
-  return Array.from(businessMap.values());
-}
-
-/* -------------------------------------------------------------------------- */
 /*                                   Page                                      */
 /* -------------------------------------------------------------------------- */
 
@@ -229,6 +134,7 @@ function ClientsContent() {
     setTestMode(localStorage.getItem("clientsTestMode") === "true");
   }, []);
 
+  
   const toggleTestMode = () => {
     setTestMode((prev) => {
       const next = !prev;
@@ -237,32 +143,7 @@ function ClientsContent() {
     });
   };
 
-  const { data: wabaData, isLoading: wabasLoading } = useQuery<PagedResponse<WabaAccount>>({
-    queryKey: ["ycloud", "business-accounts"],
-    queryFn: async () =>
-      apiFetch<PagedResponse<WabaAccount>>("/integrations/ycloud/whatsapp/business-accounts"),
-    refetchInterval: 30000,
-    enabled: !testMode,
-  });
-
-  const { data: phoneData, isLoading: phonesLoading } = useQuery<PagedResponse<PhoneNumber>>({
-    queryKey: ["ycloud", "phone-numbers"],
-    queryFn: async () =>
-      apiFetch<PagedResponse<PhoneNumber>>(
-        "/integrations/ycloud/whatsapp/phone-numbers?page=1&limit=10&includeTotal=false"
-      ),
-    refetchInterval: 30000,
-    enabled: !testMode,
-  });
-
-  const wabaPage = testMode ? mockWabaPage : wabaData;
-  const phonePage = testMode ? mockPhonePage : phoneData;
-  const isLoading = !testMode && (wabasLoading || phonesLoading);
-
-  const businesses = useMemo(
-    () => buildHierarchy(wabaPage?.items ?? [], phonePage?.items ?? []),
-    [wabaPage, phonePage]
-  );
+  const { businesses, kpis, isLoading } = useYCloudAccounts({ testMode });
 
   const filteredBusinesses = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -280,21 +161,6 @@ function ClientsContent() {
       );
     });
   }, [businesses, searchQuery]);
-
-  const totals = useMemo(() => {
-    const wabaCount = businesses.reduce((acc, b) => acc + b.wabas.length, 0);
-    const phoneCount = businesses.reduce((acc, b) => acc + b.phoneCount, 0);
-    const connected = businesses.reduce(
-      (acc, b) =>
-        acc +
-        b.wabas.reduce(
-          (a, w) => a + w.phoneNumbers.filter((p) => p.status === "CONNECTED").length,
-          0
-        ),
-      0
-    );
-    return { businessCount: businesses.length, wabaCount, phoneCount, connected };
-  }, [businesses]);
 
   const drawerBusiness = businesses.find((b) => b.businessId === drawerBusinessId) ?? null;
 
@@ -318,7 +184,7 @@ function ClientsContent() {
           + Connect New WABA
         </Link>
       </div>
-      <button
+      {/* <button
         onClick={toggleTestMode}
         className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors ${testMode
             ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400"
@@ -327,30 +193,10 @@ function ClientsContent() {
       >
         <span className={`h-1.5 w-1.5 rounded-full ${testMode ? "bg-amber-500 animate-pulse" : "bg-gray-400"}`} />
         {testMode ? "Test Mode: ON" : "Test Mode: OFF"}
-      </button>
+      </button> */}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Business Accounts</p>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{totals.businessCount}</p>
-        </div>
-        <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">WABA Accounts</p>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{totals.wabaCount}</p>
-        </div>
-        <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Phone Numbers</p>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{totals.phoneCount}</p>
-        </div>
-        <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 p-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Connected</p>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="h-2 w-2 rounded-full bg-success-500" />
-            <p className="text-xl font-bold text-gray-900 dark:text-white">{totals.connected}</p>
-          </div>
-        </div>
-      </div>
+      <AccountsKpiCards kpis={kpis} isLoading={isLoading} compact />
 
       {/* Search */}
       <div className="relative w-full sm:w-96">

@@ -2,7 +2,7 @@ import DashboardContent from "@/components/dashboard/DashboardContent";
 
 export const metadata = {
   title: "Dashboard | WhatsAppHub",
-  description: "WhatsAppHub dashboard",
+  description: "Backend system health and status",
 };
 
 export default function DashboardPage() {
