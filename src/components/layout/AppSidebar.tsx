@@ -36,6 +36,34 @@ const managementItems: NavItem[] = MANAGEMENT_NAV_ITEMS.map((item) => ({
   icon: resolveNavIcon(item.icon),
 }));
 
+const YCLOUD_LOGO_SRC = "/images/logo/ycloud-expand-logo.svg";
+
+function SidebarLogo({ expanded }: { expanded: boolean }) {
+  return (
+    <div className="flex flex-col items-center justify-center px-4 py-3 shrink-0 border-b border-gray-200/20 dark:border-gray-700 bg-gradient-to-r from-[#128C7E] to-[#25D366] dark:from-[#0d2d2a] dark:to-[#0f3d30]">
+      {expanded ? (
+        <>
+          <Image src="/images/logo/logo-dark.svg" alt={APP_CONFIG.logoAlt} width={160} height={36} priority />
+          <div className="mt-2.5 w-full flex items-center justify-end gap-1.5">
+            <span className="text-[9px] font-normal leading-none tracking-wide text-white/65 whitespace-nowrap">
+              Powered by
+            </span>
+            <Image
+              src={YCLOUD_LOGO_SRC}
+              alt="YCloud"
+              width={52}
+              height={14}
+              className="brightness-0 invert opacity-85 shrink-0"
+            />
+          </div>
+        </>
+      ) : (
+        <Image src="/images/logo/logo-icon.svg" alt={APP_CONFIG.logoAlt} width={36} height={36} priority />
+      )}
+    </div>
+  );
+}
+
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, toggleSidebar, toggleMobileSidebar, closeMobileSidebar } = useSidebar();
   const pathname = usePathname();
@@ -151,14 +179,7 @@ const AppSidebar: React.FC = () => {
           />
         </button>
 
-        {/* Logo */}
-        <div className="flex items-center h-16 px-4 border-b border-gray-200/20 dark:border-gray-700 shrink-0 bg-gradient-to-r from-[#128C7E] to-[#25D366] dark:from-[#0d2d2a] dark:to-[#0f3d30]">
-          {show ? (
-            <Image src="/images/logo/logo-dark.svg" alt={APP_CONFIG.logoAlt} width={160} height={36} priority />
-          ) : (
-            <Image src="/images/logo/logo-icon.svg" alt={APP_CONFIG.logoAlt} width={36} height={36} priority />
-          )}
-        </div>
+        <SidebarLogo expanded={show} />
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
@@ -233,9 +254,7 @@ const AppSidebar: React.FC = () => {
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center h-16 px-4 border-b border-gray-200/20 dark:border-gray-700 shrink-0 bg-gradient-to-r from-[#128C7E] to-[#25D366] dark:from-[#0d2d2a] dark:to-[#0f3d30]">
-          <Image src="/images/logo/logo-dark.svg" alt={APP_CONFIG.logoAlt} width={160} height={36} priority />
-        </div>
+        <SidebarLogo expanded />
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
           <div>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">{NAV_SECTION_LABELS.main}</p>
