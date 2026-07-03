@@ -11,6 +11,7 @@ import type {
   WhatsAppMessageType,
   WhatsAppTemplate,
 } from "@/modules/whatsapp/types";
+import { CheckBoldIcon, SendMessageIcon } from "@/icons";
 
 const DEFAULT_FROM = "";
 const DEFAULT_TO = "";
@@ -327,18 +328,7 @@ export function SendMessageForm() {
               {isPending ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
+                <SendMessageIcon className="w-4 h-4" />
               )}
               <span>{isPending ? "Sending…" : "Send Message"}</span>
             </button>
@@ -351,17 +341,7 @@ export function SendMessageForm() {
         <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-5">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                viewBox="0 0 24 24"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <CheckBoldIcon className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <h3 className="font-bold text-emerald-900 dark:text-emerald-300">

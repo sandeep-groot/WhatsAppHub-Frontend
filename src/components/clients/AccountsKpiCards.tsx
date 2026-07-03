@@ -2,6 +2,12 @@
 
 import React from "react";
 import type { AccountKpis } from "@/modules/clients/types";
+import {
+  BusinessAccountIcon,
+  CheckCircleIcon,
+  MessageSquareIcon,
+  PhoneIcon,
+} from "@/icons";
 
 interface KpiCardConfig {
   key: keyof AccountKpis;
@@ -18,34 +24,21 @@ const KPI_CARDS: KpiCardConfig[] = [
     key: "businessCount",
     label: "Business Accounts",
     subtitle: "Registered Meta businesses",
-    icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-      </svg>
-    ),
+    icon: <BusinessAccountIcon />,
     iconBg: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400",
   },
   {
     key: "wabaCount",
     label: "WABA Accounts",
     subtitle: "WhatsApp Business Accounts",
-    icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
+    icon: <MessageSquareIcon />,
     iconBg: "bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400",
   },
   {
     key: "phoneCount",
     label: "Phone Numbers",
     subtitle: "Registered sender numbers",
-    icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-      </svg>
-    ),
+    icon: <PhoneIcon />,
     iconBg: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   },
   {
@@ -54,11 +47,7 @@ const KPI_CARDS: KpiCardConfig[] = [
     subtitle: "Active phone numbers",
     showStatusDot: true,
     dotColor: "bg-emerald-500",
-    icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    icon: <CheckCircleIcon />,
     iconBg: "bg-success-50 dark:bg-success-500/10 text-success-600 dark:text-success-400",
   },
 ];

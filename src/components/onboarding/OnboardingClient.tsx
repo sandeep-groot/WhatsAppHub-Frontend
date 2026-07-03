@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import YCloudEmbeddedSignup from "./YCloudEmbeddedSignup";
+import { AlertCircleIcon, CheckBoldIcon } from "@/icons";
 
 interface WabaDetails {
   wabaId: string;
@@ -43,11 +44,7 @@ export default function OnboardingClient() {
           {errorMsg && (
             <div className="rounded-2xl border border-error-200 bg-error-50 dark:border-error-500/20 dark:bg-error-500/10 p-4 transition-all duration-300">
               <div className="flex gap-3">
-                <svg className="w-5 h-5 text-error-600 dark:text-error-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
+                <AlertCircleIcon className="text-error-600 dark:text-error-400 shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-error-800 dark:text-error-400">
                     Onboarding Failure
@@ -64,9 +61,7 @@ export default function OnboardingClient() {
             <div className="rounded-2xl border border-success-200 bg-success-50 dark:border-success-500/20 dark:bg-success-500/10 p-5 transition-all duration-300">
               <div className="flex gap-4">
                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-success-500 text-white shrink-0 shadow-sm shadow-success-500/20">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <CheckBoldIcon />
                 </div>
                 <div className="space-y-2 flex-1">
                   <h3 className="text-sm font-bold text-success-800 dark:text-success-400">

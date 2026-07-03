@@ -5,6 +5,7 @@ import Button from "@/components/ui/button/Button";
 import { apiFetch } from "@/lib/http";
 import { env } from "@/lib/env";
 import { WabaBindRequest } from "@/modules/onboarding/types";
+import { FacebookIcon, WhatsAppBubbleIcon } from "@/icons";
 
 declare global {
   interface Window {
@@ -208,15 +209,11 @@ export default function YCloudEmbeddedSignup({
       {/* Icon cluster */}
       <div className="flex items-center gap-4 mb-6">
         <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 shadow-inner">
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-          </svg>
+          <WhatsAppBubbleIcon />
         </div>
         <div className="h-0.5 w-6 bg-gray-200 dark:bg-gray-700" />
         <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#1877f2]/10 dark:bg-[#1877f2]/20 text-[#1877f2] shadow-inner">
-          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-          </svg>
+          <FacebookIcon />
         </div>
       </div>
 
@@ -246,9 +243,7 @@ export default function YCloudEmbeddedSignup({
             </div>
           ) : (
             <>
-              <svg className="w-5 h-5 shrink-0 fill-current" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
+              <FacebookIcon className="w-5 h-5 shrink-0 fill-current" />
               <span>Connect with Facebook</span>
             </>
           )}
