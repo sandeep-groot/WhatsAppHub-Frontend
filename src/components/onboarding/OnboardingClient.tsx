@@ -27,10 +27,10 @@ export default function OnboardingClient() {
       {/* Header Section */}
       <div className="flex flex-col gap-2 border-b border-gray-100 dark:border-gray-800 pb-6">
         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-          Account Onboarding
+          Client Onboarding
         </h1>
         <p className="text-base text-gray-500 dark:text-gray-400">
-          Set up and connect your WhatsApp Business API profile to start automating your messaging workflows.
+          Set up and connect your WhatsApp Business Account to start your messaging workflows.
         </p>
       </div>
 
@@ -95,14 +95,14 @@ export default function OnboardingClient() {
           )}
 
           {/* Onboarding steps visual list */}
-          <div className="card space-y-6">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          {/* <div className="card space-y-6"> */}
+            {/* <h2 className="text-lg font-bold text-gray-900 dark:text-white">
               Onboarding Checklist
-            </h2>
+            </h2> */}
             
-            <div className="space-y-4">
+            {/* <div className="space-y-4"> */}
               {/* Step 1 */}
-              <div className="flex gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors duration-200">
+              {/* <div className="flex gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors duration-200">
                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500 text-white shrink-0 font-bold text-sm shadow-sm shadow-emerald-500/20">
                   ✓
                 </div>
@@ -114,7 +114,7 @@ export default function OnboardingClient() {
                     Your operator user profile has been successfully set up and validated.
                   </p>
                 </div>
-              </div>
+              </div> */}
 
               {/* Step 2 */}
               <div className={`flex gap-4 p-4 rounded-xl transition-all duration-200 ${
@@ -128,15 +128,15 @@ export default function OnboardingClient() {
                   </div>
                 ) : (
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 font-bold text-sm">
-                    2
+                    
                   </div>
                 )}
                 <div className="space-y-1 flex-1">
                   <h3 className={`text-sm font-bold ${!wabaInfo ? "text-emerald-800 dark:text-emerald-400" : "text-gray-900 dark:text-white"}`}>
-                    Step 2: Connect WhatsApp Account
+                    Connect WhatsApp Business Account
                   </h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                    Link your Meta Business Manager and register your business number via YCloud's login popup.
+                    Link your Meta Business Manager and register your business number via YCloud's embedded signup.
                   </p>
                   
                   {!wabaInfo && (
@@ -151,7 +151,7 @@ export default function OnboardingClient() {
               </div>
 
               {/* Step 3 */}
-              <div className="flex gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors duration-200">
+              {/* <div className="flex gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors duration-200">
                 {wabaInfo ? (
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 font-bold text-sm animate-pulse">
                     3
@@ -169,13 +169,13 @@ export default function OnboardingClient() {
                     Set up status delivery webhooks for messaging updates (automatically bound upon WABA creation).
                   </p>
                 </div>
-              </div>
-            </div>
-          </div>
+              </div> */}
+            {/* </div> */}
+          {/* </div> */}
         </div>
 
         {/* Right side: Helpful Info sidebar */}
-        <div className="space-y-6">
+        {/* <div className="space-y-6">
           <div className="card space-y-4">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
               Onboarding Help
@@ -211,7 +211,7 @@ export default function OnboardingClient() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

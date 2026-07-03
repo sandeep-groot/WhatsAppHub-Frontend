@@ -205,9 +205,9 @@ export default function YCloudEmbeddedSignup({
   const isConfigured = Boolean(appId && configId && solutionId);
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-white dark:bg-gray-800 shadow-sm w-full max-w-md mx-auto transition-all duration-300">
+    <div className="flex flex-col items-center justify-center  shadow-sm w-full max-w-md mx-auto transition-all duration-300">
       {/* Icon cluster */}
-      <div className="flex items-center gap-4 mb-6">
+      {/* <div className="flex items-center gap-4 mb-6">
         <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 shadow-inner">
           <WhatsAppBubbleIcon />
         </div>
@@ -222,7 +222,7 @@ export default function YCloudEmbeddedSignup({
       </h3>
       <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-2 mb-6 max-w-xs leading-relaxed">
         Connect your Meta Business Manager and register your business number via YCloud.
-      </p>
+      </p> */}
 
       {/* Trigger Button */}
       <div className="w-full relative">
@@ -265,7 +265,7 @@ export default function YCloudEmbeddedSignup({
         )}
 
         {isSdkLoaded && isConfigured && !isSigningUp && (
-          <div className="flex items-center justify-center gap-1.5 mt-3">
+          <div className="flex items-center justify-center gap-1.5 mt-1 mb-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
             <p className="text-center text-[10px] text-gray-400 dark:text-gray-500 font-medium tracking-wide uppercase">
               Ready to Connect
