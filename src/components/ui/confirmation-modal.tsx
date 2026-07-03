@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Modal } from "./modal";
+import { AlertTriangleIcon, CheckIcon, InfoCircleIcon } from "@/icons";
 
 export interface ConfirmationModalProps {
   isOpen: boolean;
@@ -19,38 +20,22 @@ const typeConfigs = {
   danger: {
     btnClass: "bg-rose-500 hover:bg-rose-600 focus:ring-rose-500/20 text-white shadow-sm shadow-rose-500/10",
     iconClass: "text-rose-600 bg-rose-50 dark:bg-rose-500/10 dark:text-rose-400",
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-    ),
+    icon: <AlertTriangleIcon />,
   },
   warning: {
     btnClass: "bg-amber-500 hover:bg-amber-600 focus:ring-amber-500/20 text-white shadow-sm shadow-amber-500/10",
     iconClass: "text-amber-600 bg-amber-50 dark:bg-amber-500/10 dark:text-amber-400",
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-    ),
+    icon: <AlertTriangleIcon />,
   },
   info: {
     btnClass: "bg-blue-500 hover:bg-blue-600 focus:ring-blue-500/20 text-white shadow-sm shadow-blue-500/10",
     iconClass: "text-blue-600 bg-blue-50 dark:bg-blue-500/10 dark:text-blue-400",
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    icon: <InfoCircleIcon />,
   },
   success: {
     btnClass: "bg-emerald-500 hover:bg-emerald-600 focus:ring-emerald-500/20 text-white shadow-sm shadow-emerald-500/10",
     iconClass: "text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400",
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-      </svg>
-    ),
+    icon: <CheckIcon className="w-6 h-6" />,
   },
 };
 

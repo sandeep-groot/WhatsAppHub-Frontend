@@ -5,6 +5,20 @@ import Link from "next/link";
 import { apiFetch } from "@/lib/http";
 import { buildBusinessHierarchy } from "@/modules/clients/utils";
 import { useQuery } from "@tanstack/react-query";
+import {
+  BuildingIcon,
+  ChatBubbleDotsIcon,
+  CheckIcon,
+  ChevronDownWideIcon,
+  CloseIcon,
+  CopyDuplicateIcon,
+  FolderIcon,
+  GlobeIcon,
+  MessageDeliveredIcon,
+  MessageReadIcon,
+  MessageSentIcon,
+  SearchIcon,
+} from "@/icons";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                     */
@@ -162,13 +176,9 @@ function CopyButton({ value, label }: { value: string; label?: string }) {
         }`}
     >
       {copied ? (
-        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
+        <CheckIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
       ) : (
-        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 8V6a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2h-2M6 8h8a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8a2 2 0 012-2z" />
-        </svg>
+        <CopyDuplicateIcon />
       )}
     </button>
   );
@@ -270,9 +280,7 @@ function ClientsContent() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500"
         />
-        <svg className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+        <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
       </div>
 
       {/* Hierarchy as full-width grouped tables */}
@@ -284,9 +292,7 @@ function ClientsContent() {
       ) : filteredBusinesses.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-600">
-            <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-            </svg>
+            <FolderIcon />
           </div>
           <h3 className="text-sm font-bold text-gray-900 dark:text-white mt-4">No Business Accounts Found</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mt-1 leading-relaxed">
@@ -353,20 +359,15 @@ function BusinessTableCard({
       <div className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
         <div onClick={onToggle} className="flex flex-1 items-center gap-3 text-left cursor-pointer select-none">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m4-14h2m-2 4h2m4-4h2m-2 4h2" />
-            </svg>
+            <BuildingIcon />
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-gray-900 dark:text-white truncate">{business.businessName}</h2>
               {verified ? <Pill tone="success">Verified</Pill> : <Pill>{titleCase(business.businessVerificationStatus)}</Pill>}
-              <svg
-                className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+              <ChevronDownWideIcon
+                className={`text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+              />
             </div>
             <div className="mt-1 flex items-center gap-2">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Business ID</span>
@@ -424,9 +425,7 @@ function BusinessTableCard({
                       <>
                         <td rowSpan={rowCount} className="px-5 py-3 align-top">
                           <div className="flex items-start gap-2">
-                            <svg className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.6 9h16.8M3.6 15h16.8M11.5 3a17 17 0 000 18M12.5 3a17 17 0 010 18" />
-                            </svg>
+                            <GlobeIcon className="mt-0.5 text-emerald-500 shrink-0" />
                             <div className="min-w-0">
                               <p className="font-bold text-gray-900 dark:text-white">{waba.name}</p>
                               {wabaVerified && (
@@ -532,9 +531,7 @@ function DetailsDrawer({
             className="shrink-0 flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             aria-label="Close"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <CloseIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -695,9 +692,7 @@ function ConsoleDrawer({
             className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             aria-label="Close"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <CloseIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -715,15 +710,7 @@ function ConsoleDrawer({
                   onChange={(e) => setCustomerSearch(e.target.value)}
                   className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                 />
-                <svg
-                  className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <SearchIcon className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400" />
               </div>
             </div>
 
@@ -828,17 +815,11 @@ function ConsoleDrawer({
                             {isOutbound && (
                               <span className="flex items-center">
                                 {msg.status === "READ" ? (
-                                  <svg className="h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7m-12 0l4 4L19 7" />
-                                  </svg>
+                                  <MessageReadIcon className="text-emerald-500 dark:text-emerald-400" />
                                 ) : msg.status === "DELIVERED" ? (
-                                  <svg className="h-3 w-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7m-12 0l4 4L19 7" />
-                                  </svg>
+                                  <MessageDeliveredIcon />
                                 ) : (
-                                  <svg className="h-3 w-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                  </svg>
+                                  <MessageSentIcon />
                                 )}
                               </span>
                             )}
@@ -851,19 +832,7 @@ function ConsoleDrawer({
               </>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-gray-400">
-                <svg
-                  className="h-10 w-10 text-gray-300 mb-2"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
+                <ChatBubbleDotsIcon className="text-gray-300 mb-2" />
                 <p className="text-xs">Select a customer connection on the left to view message logs.</p>
               </div>
             )}

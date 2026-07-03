@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteAuditLogs } from "@/modules/audit/client/hooks";
 import type { AuditLog } from "@/modules/audit/types";
+import { ClipboardCheckIcon, CloseIcon, SearchIcon } from "@/icons";
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
 
@@ -252,15 +253,7 @@ export function AuditLogFeed() {
     <div className="space-y-4">
       {/* Search bar */}
       <div className="relative">
-        <svg
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
-        </svg>
+        <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
           value={search}
@@ -275,9 +268,7 @@ export function AuditLogFeed() {
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
             aria-label="Clear search"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <CloseIcon className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -297,9 +288,7 @@ export function AuditLogFeed() {
       {filteredLogs.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-12 text-center flex flex-col items-center">
           <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center mb-4 text-gray-400 dark:text-gray-500">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
+            <ClipboardCheckIcon />
           </div>
           <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">
             {debouncedSearch ? "No matching entries" : "No audit logs yet"}
