@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import type { Webhook } from "@/modules/webhook/types";
 import { useUpdateWebhookEndpoint, useRotateWebhookSecret } from "@/modules/webhook/client/hooks";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
+import { CheckIcon, CopyIcon, EditIcon, RotateIcon, TrashIcon } from "@/icons";
 
 interface WebhookListProps {
   webhooks: Webhook[];
@@ -12,47 +13,6 @@ interface WebhookListProps {
   onShowSecret: (secret: string, url: string) => void;
 }
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-
-function CopyIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-    </svg>
-  );
-}
-
-function RotateIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m-5 4a5 5 0 01-5-5 5 5 0 015-5 5 5 0 015 5c0 1.22-.44 2.33-1.17 3.17L13 15h4v2h-2v2h-2v-4z" />
-    </svg>
-  );
-}
-
-function EditIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-    </svg>
-  );
-}
 
 // ─── Status toggle ─────────────────────────────────────────────────────────────
 
@@ -112,7 +72,7 @@ function ActionButtons({ webhook, copiedId, onCopy, onRotate, onEdit, onDelete }
         className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-xl transition-all"
         title="Copy URL"
       >
-        {copiedId === webhook.id ? <CheckIcon /> : <CopyIcon />}
+        {copiedId === webhook.id ? <CheckIcon className="text-emerald-500" /> : <CopyIcon />}
       </button>
       <button
         onClick={onRotate}
@@ -265,7 +225,7 @@ export function WebhookList({ webhooks, onEdit, onDelete, onShowSecret }: Webhoo
                   className="p-2 mt-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-xl transition-all shrink-0"
                   title="Copy URL"
                 >
-                  {copiedId === webhook.id ? <CheckIcon /> : <CopyIcon />}
+                  {copiedId === webhook.id ? <CheckIcon className="text-emerald-500" /> : <CopyIcon />}
                 </button>
               </div>
 
