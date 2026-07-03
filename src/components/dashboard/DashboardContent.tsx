@@ -7,6 +7,7 @@ import { useSystemHealth } from "@/modules/health/client/hooks";
 import { useYCloudAccounts } from "@/modules/clients/client/hooks";
 import type { HealthCheckResult } from "@/modules/health/types";
 import { PAGE_ROUTES } from "@/lib/constants";
+import { RefreshIcon } from "@/icons";
 
 /* ── Status helpers ───────────────────────────────────────────────────────── */
 
@@ -158,9 +159,7 @@ export default function DashboardContent() {
           {refreshing ? (
             <div className="w-4 h-4 border-2 border-gray-300 border-t-emerald-500 rounded-full animate-spin" />
           ) : (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <RefreshIcon />
           )}
           Refresh
         </button>
