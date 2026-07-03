@@ -1,9 +1,7 @@
 import SignUpForm from "@/components/auth/SignUpForm";
+import { createPageMetadata } from "@/lib/constants";
 
-export const metadata = {
-  title: "Sign Up | WhatsAppHub",
-  description: "Create a new WhatsAppHub account",
-};
+export const metadata = createPageMetadata("signUp");
 
 export default function SignUpPage() {
   return <SignUpForm />;

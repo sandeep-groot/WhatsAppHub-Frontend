@@ -1,13 +1,9 @@
-import { env } from "@/lib/env";
-import { PAGE_ROUTES } from "@/lib/constants";
+import { APP_CONFIG, PAGE_ROUTES, createPageMetadata } from "@/lib/constants";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: `Terms of Service | ${env.NEXT_PUBLIC_APP_NAME}`,
-  description: `Terms of Service for ${env.NEXT_PUBLIC_APP_NAME}`,
-};
+export const metadata: Metadata = createPageMetadata("terms");
 
 export default function TermsPage() {
   return (
@@ -17,12 +13,12 @@ export default function TermsPage() {
           <Link href={PAGE_ROUTES.LOGIN} className="flex items-center gap-2">
             <Image
               src="/images/logo/logo-icon.svg"
-              alt={env.NEXT_PUBLIC_APP_NAME}
+              alt={APP_CONFIG.name}
               width={32}
               height={32}
             />
             <span className="text-sm font-semibold text-gray-900 dark:text-white">
-              {env.NEXT_PUBLIC_APP_NAME}
+              {APP_CONFIG.name}
             </span>
           </Link>
           <Link
@@ -49,7 +45,7 @@ export default function TermsPage() {
 
         <div className="mt-8 space-y-6 text-gray-700 dark:text-gray-300">
           <p>
-            By using {env.NEXT_PUBLIC_APP_NAME}, you agree to comply with all
+            By using {APP_CONFIG.name}, you agree to comply with all
             applicable laws and Meta WhatsApp Business policies.
           </p>
 

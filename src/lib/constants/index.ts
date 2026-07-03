@@ -1,40 +1,26 @@
 /**
- * Application constants
+ * Application constants — central re-export for routes, config, copy, and defaults.
  */
 
-export const APP_NAME = "WhatsAppHub";
-export const APP_VERSION = "1.0.0";
-
-export const API_ROUTES = {
-  AUTH: {
-    LOGIN: "/auth/login",
-    ME: "/auth/me",
-    LOGOUT: "/auth/logout",
-    SIGNUP: "/auth/signup",
-    REFRESH: "/auth/refresh",
-  },
-  CLIENTS: "/clients",
-  WEBHOOKS: "/webhooks",
-  USERS: "/users",
-  ROLES: "/roles",
-  AUDIT_LOGS: "/audit-logs",
-} as const;
-
-export const PAGE_ROUTES = {
-  LOGIN: "/login",
-  SIGNUP: "/signup",
-  FORGOT_PASSWORD: "/forgot-password",
-  PRIVACY: "/privacy",
-  TERMS: "/terms",
-  DATA_DELETION: "/data-deletion",
-  DASHBOARD: "/dashboard",
-  CLIENTS: "/clients",
-  CONNECTIONS: "/connections",
-  ONBOARDING: "/onboarding",
-  MESSAGES: "/messages",
-  WEBHOOKS: "/webhook",
-  AUDIT_LOGS: "/audit-logs",
-  USERS: "/users",
-  ROLES: "/roles",
-  SETTINGS: "/settings",
-} as const;
+export { API_ROUTES, PAGE_ROUTES } from "./routes";
+export { FEATURES, type FeatureKey } from "./features";
+export {
+  APP_CONFIG,
+  APP_NAME,
+  APP_VERSION,
+  PAGE_METADATA,
+  createPageMetadata,
+  type PageMetadataKey,
+} from "./app";
+export {
+  NAV_SECTION_LABELS,
+  FOOTER_LINK_LABELS,
+  KPI_CARD_COPY,
+  EMPTY_STATE_COPY,
+} from "./copy";
+export {
+  POLLING_DEFAULTS,
+  PAGINATION_DEFAULTS,
+  MESSAGE_FORM_DEFAULTS,
+  QUERY_DEFAULTS,
+} from "./defaults";

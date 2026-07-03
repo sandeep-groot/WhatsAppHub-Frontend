@@ -1,11 +1,9 @@
 import RedirectIfAuthenticated from "@/components/auth/RedirectIfAuthenticated";
 import SignInForm from "@/components/auth/SignInForm";
+import { createPageMetadata } from "@/lib/constants";
 import { Suspense } from "react";
 
-export const metadata = {
-  title: "Sign In | WhatsAppHub",
-  description: "Sign in to your WhatsAppHub account",
-};
+export const metadata = createPageMetadata("signIn");
 
 export default function LoginPage() {
   return (

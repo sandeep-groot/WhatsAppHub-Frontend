@@ -1,15 +1,11 @@
-import { env } from "@/lib/env";
-import { PAGE_ROUTES } from "@/lib/constants";
+import { APP_CONFIG, PAGE_ROUTES, createPageMetadata } from "@/lib/constants";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 const SUPPORT_EMAIL = "info@grootsoftwares.com";
 
-export const metadata: Metadata = {
-  title: `Data Deletion Instructions | ${env.NEXT_PUBLIC_APP_NAME}`,
-  description: `How to request deletion of your data from ${env.NEXT_PUBLIC_APP_NAME}`,
-};
+export const metadata: Metadata = createPageMetadata("dataDeletion");
 
 export default function DataDeletionPage() {
   return (
@@ -19,12 +15,12 @@ export default function DataDeletionPage() {
           <Link href={PAGE_ROUTES.LOGIN} className="flex items-center gap-2">
             <Image
               src="/images/logo/logo-icon.svg"
-              alt={env.NEXT_PUBLIC_APP_NAME}
+              alt={APP_CONFIG.name}
               width={32}
               height={32}
             />
             <span className="text-sm font-semibold text-gray-900 dark:text-white">
-              {env.NEXT_PUBLIC_APP_NAME}
+              {APP_CONFIG.name}
             </span>
           </Link>
           <Link
@@ -51,7 +47,7 @@ export default function DataDeletionPage() {
 
         <div className="mt-8 space-y-6 text-gray-700 dark:text-gray-300">
           <p>
-            If you want your personal data removed from {env.NEXT_PUBLIC_APP_NAME},
+            If you want your personal data removed from {APP_CONFIG.name},
             you can request deletion using the steps below.
           </p>
 
@@ -72,7 +68,7 @@ export default function DataDeletionPage() {
               </li>
               <li>
                 Include the email address associated with your{" "}
-                {env.NEXT_PUBLIC_APP_NAME} or WhatsApp Business account.
+                {APP_CONFIG.name} or WhatsApp Business account.
               </li>
               <li>
                 We will verify your request and confirm once deletion is complete.

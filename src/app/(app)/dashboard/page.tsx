@@ -1,9 +1,7 @@
 import DashboardContent from "@/components/dashboard/DashboardContent";
+import { createPageMetadata } from "@/lib/constants";
 
-export const metadata = {
-  title: "Dashboard | WhatsAppHub",
-  description: "Backend system health and status",
-};
+export const metadata = createPageMetadata("dashboard");
 
 export default function DashboardPage() {
   return <DashboardContent />;

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { SendMessageForm } from "@/components/whatsapp/SendMessageForm";
+import { EMPTY_STATE_COPY, PAGE_METADATA } from "@/lib/constants";
 
 export default function MessagesPage() {
   return (
@@ -9,11 +10,10 @@ export default function MessagesPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Send WhatsApp Message
+          {PAGE_METADATA.messages.heading}
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Send a test message from WhatsAppHub. Choose a pre-approved template to start a
-          conversation, or send free-form text inside an open 24-hour customer window.
+          {EMPTY_STATE_COPY.messages.pageDescription}
         </p>
       </div>
 

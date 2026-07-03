@@ -8,6 +8,7 @@ import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { useWebhookEndpoints, useDeleteWebhookEndpoint } from "@/modules/webhook/client/hooks";
 import type { Webhook } from "@/modules/webhook/types";
 import { AlertTriangleIcon, CogIcon, PlusIcon } from "@/icons";
+import { EMPTY_STATE_COPY, PAGE_METADATA } from "@/lib/constants";
 
 export default function WebhookPage() {
   const { data: webhooksData, isLoading, error, refetch } = useWebhookEndpoints();
@@ -80,10 +81,10 @@ export default function WebhookPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Webhook Integrations
+            {PAGE_METADATA.webhooks.heading}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Manage YCloud webhook endpoints to receive real-time updates for WhatsApp events.
+            {EMPTY_STATE_COPY.webhooks.pageDescription}
           </p>
         </div>
         <button
@@ -91,7 +92,7 @@ export default function WebhookPage() {
           className="px-4 py-2.5 text-sm font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white shadow-sm shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 self-start sm:self-center"
         >
           <PlusIcon />
-          <span>Add Webhook</span>
+          <span>{EMPTY_STATE_COPY.webhooks.addButton}</span>
         </button>
       </div>
 
@@ -107,15 +108,15 @@ export default function WebhookPage() {
           <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-3 text-red-600 dark:text-red-400">
             <AlertTriangleIcon className="w-6 h-6" />
           </div>
-          <h3 className="font-bold text-gray-950 dark:text-white mb-1">Failed to load webhooks</h3>
+          <h3 className="font-bold text-gray-950 dark:text-white mb-1">{EMPTY_STATE_COPY.webhooks.errorTitle}</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-4">
-            {(error as any).message || "The server responded with an error. Check your connection or credentials."}
+            {(error as any).message || EMPTY_STATE_COPY.webhooks.errorFallback}
           </p>
           <button
             onClick={() => refetch()}
             className="px-4 py-2 text-sm font-semibold rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
           >
-            Try Again
+            {EMPTY_STATE_COPY.webhooks.tryAgain}
           </button>
         </div>
       ) : !webhooks || webhooks.length === 0 ? (
@@ -124,16 +125,16 @@ export default function WebhookPage() {
             <CogIcon />
           </div>
           <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">
-            No Webhook Endpoints
+            {EMPTY_STATE_COPY.webhooks.emptyTitle}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-6">
-            You haven't configured any YCloud webhook endpoints yet. Register one to start routing live events.
+            {EMPTY_STATE_COPY.webhooks.emptyDescription}
           </p>
           <button
             onClick={handleAddClick}
             className="px-4 py-2.5 text-sm font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white shadow-sm shadow-emerald-500/20 transition-all"
           >
-            Configure Webhook
+            {EMPTY_STATE_COPY.webhooks.emptyAction}
           </button>
         </div>
       ) : (

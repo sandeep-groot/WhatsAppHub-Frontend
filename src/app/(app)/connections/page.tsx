@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/http";
 import Link from "next/link";
 import { AlertTriangleIcon, SearchIcon } from "@/icons";
+import { EMPTY_STATE_COPY } from "@/lib/constants";
 
 interface OnboardingStep {
   id: string;
@@ -171,16 +172,16 @@ export default function ConnectionsPage() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-            <p className="text-xs text-gray-400">Loading connection directory...</p>
+            <p className="text-xs text-gray-400">{EMPTY_STATE_COPY.connections.loading}</p>
           </div>
         ) : sortedNumbers?.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-600">
               <AlertTriangleIcon className="h-8 w-8" />
             </div>
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white mt-4">No Connections Found</h3>
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mt-4">{EMPTY_STATE_COPY.connections.title}</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mt-1 leading-relaxed">
-              No connections match the active search filters. Adjust filters or register a new WABA.
+              {EMPTY_STATE_COPY.connections.description}
             </p>
           </div>
         ) : (

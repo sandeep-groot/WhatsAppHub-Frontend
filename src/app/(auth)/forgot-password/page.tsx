@@ -1,9 +1,7 @@
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import { createPageMetadata } from "@/lib/constants";
 
-export const metadata = {
-  title: "Forgot Password | WhatsAppHub",
-  description: "Reset your WhatsAppHub password",
-};
+export const metadata = createPageMetadata("forgotPassword");
 
 export default function ForgotPasswordPage() {
   return <ForgotPasswordForm />;

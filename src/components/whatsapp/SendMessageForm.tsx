@@ -12,9 +12,7 @@ import type {
   WhatsAppTemplate,
 } from "@/modules/whatsapp/types";
 import { CheckBoldIcon, SendMessageIcon } from "@/icons";
-
-const DEFAULT_FROM = "";
-const DEFAULT_TO = "";
+import { MESSAGE_FORM_DEFAULTS } from "@/lib/constants";
 
 const PLACEHOLDER_REGEX = /\{\{[^}]+\}\}/g;
 
@@ -39,8 +37,8 @@ export function SendMessageForm() {
     [templatesQuery.data]
   );
 
-  const [from, setFrom] = useState(DEFAULT_FROM);
-  const [to, setTo] = useState(DEFAULT_TO);
+  const [from, setFrom] = useState(MESSAGE_FORM_DEFAULTS.from);
+  const [to, setTo] = useState(MESSAGE_FORM_DEFAULTS.to);
   const [type, setType] = useState<WhatsAppMessageType>("template");
   const [text, setText] = useState("");
   const [selectedTemplateName, setSelectedTemplateName] = useState("");

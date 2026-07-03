@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteAuditLogs } from "@/modules/audit/client/hooks";
 import type { AuditLog } from "@/modules/audit/types";
 import { ClipboardCheckIcon, CloseIcon, SearchIcon } from "@/icons";
+import { EMPTY_STATE_COPY } from "@/lib/constants";
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
 
@@ -291,12 +292,14 @@ export function AuditLogFeed() {
             <ClipboardCheckIcon />
           </div>
           <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">
-            {debouncedSearch ? "No matching entries" : "No audit logs yet"}
+            {debouncedSearch
+              ? EMPTY_STATE_COPY.auditLogs.emptySearchTitle
+              : EMPTY_STATE_COPY.auditLogs.emptyTitle}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">
             {debouncedSearch
-              ? "Try a different search term or clear the search to see all loaded entries."
-              : "System activity will appear here as users perform actions."}
+              ? EMPTY_STATE_COPY.auditLogs.emptySearchDescription
+              : EMPTY_STATE_COPY.auditLogs.emptyDescription}
           </p>
         </div>
       ) : (

@@ -8,6 +8,16 @@ import {
   MessageSquareIcon,
   PhoneIcon,
 } from "@/icons";
+import { KPI_CARD_COPY } from "@/lib/constants";
+
+const KPI_ICONS: Record<keyof AccountKpis, React.ReactNode> = {
+  businessCount: <BusinessAccountIcon />,
+  wabaCount: <MessageSquareIcon />,
+  phoneCount: <PhoneIcon />,
+  connected: <CheckCircleIcon />,
+  pending: <CheckCircleIcon />,
+  inactive: <CheckCircleIcon />,
+};
 
 interface KpiCardConfig {
   key: keyof AccountKpis;
@@ -19,38 +29,10 @@ interface KpiCardConfig {
   dotColor?: string;
 }
 
-const KPI_CARDS: KpiCardConfig[] = [
-  {
-    key: "businessCount",
-    label: "Business Accounts",
-    subtitle: "Registered Meta businesses",
-    icon: <BusinessAccountIcon />,
-    iconBg: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  },
-  {
-    key: "wabaCount",
-    label: "WABA Accounts",
-    subtitle: "WhatsApp Business Accounts",
-    icon: <MessageSquareIcon />,
-    iconBg: "bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400",
-  },
-  {
-    key: "phoneCount",
-    label: "Phone Numbers",
-    subtitle: "Registered sender numbers",
-    icon: <PhoneIcon />,
-    iconBg: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  },
-  {
-    key: "connected",
-    label: "Connected",
-    subtitle: "Active phone numbers",
-    showStatusDot: true,
-    dotColor: "bg-emerald-500",
-    icon: <CheckCircleIcon />,
-    iconBg: "bg-success-50 dark:bg-success-500/10 text-success-600 dark:text-success-400",
-  },
-];
+const KPI_CARDS: KpiCardConfig[] = KPI_CARD_COPY.map((card) => ({
+  ...card,
+  icon: KPI_ICONS[card.key],
+}));
 
 export interface AccountsKpiCardsProps {
   kpis: AccountKpis;

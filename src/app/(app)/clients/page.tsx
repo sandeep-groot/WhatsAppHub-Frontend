@@ -19,6 +19,7 @@ import {
   MessageSentIcon,
   SearchIcon,
 } from "@/icons";
+import { EMPTY_STATE_COPY } from "@/lib/constants";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                     */
@@ -287,16 +288,16 @@ function ClientsContent() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-          <p className="text-xs text-gray-400">Loading business accounts...</p>
+          <p className="text-xs text-gray-400">{EMPTY_STATE_COPY.clients.loading}</p>
         </div>
       ) : filteredBusinesses.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-600">
             <FolderIcon />
           </div>
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white mt-4">No Business Accounts Found</h3>
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white mt-4">{EMPTY_STATE_COPY.clients.title}</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mt-1 leading-relaxed">
-            No accounts match your search. Adjust the filter or connect a new WABA.
+            {EMPTY_STATE_COPY.clients.description}
           </p>
         </div>
       ) : (
@@ -833,7 +834,7 @@ function ConsoleDrawer({
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-gray-400">
                 <ChatBubbleDotsIcon className="text-gray-300 mb-2" />
-                <p className="text-xs">Select a customer connection on the left to view message logs.</p>
+                <p className="text-xs">{EMPTY_STATE_COPY.messageConsole.description}</p>
               </div>
             )}
           </div>

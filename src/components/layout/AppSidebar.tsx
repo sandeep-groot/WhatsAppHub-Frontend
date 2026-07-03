@@ -9,19 +9,15 @@ import PrivacyPolicyLink from "@/components/common/PrivacyPolicyLink";
 import TermsOfServiceLink from "@/components/common/TermsOfServiceLink";
 import { useSidebar } from "@/context/SidebarContext";
 import {
-  AuditIcon,
-  ClientsIcon,
-  DashboardIcon,
   DeletionIcon,
-  OnboardingIcon,
   PolicyIcon,
-  SendMessageIcon,
   ChevronDownIcon,
   SidebarCollapseIcon,
   TermsIcon,
-  WebhooksIcon,
 } from "@/icons";
-import { PAGE_ROUTES } from "@/lib/constants";
+import { APP_CONFIG, FOOTER_LINK_LABELS, NAV_SECTION_LABELS, PAGE_ROUTES } from "@/lib/constants";
+import { MAIN_NAV_ITEMS, MANAGEMENT_NAV_ITEMS } from "@/config/navigation";
+import { resolveNavIcon } from "@/config/nav-icons";
 
 type NavItem = {
   name: string;
@@ -30,20 +26,15 @@ type NavItem = {
   subItems?: { name: string; path: string }[];
 };
 
-const navItems: NavItem[] = [
-  { name: "Dashboard", icon: <DashboardIcon />, path: PAGE_ROUTES.DASHBOARD },
-  { name: "Clients",   icon: <ClientsIcon />,   path: PAGE_ROUTES.CLIENTS },
-  // { name: "Connections", icon: <ConnectionsIcon />, path: PAGE_ROUTES.CONNECTIONS },
-  { name: "Send Message", icon: <SendMessageIcon />, path: PAGE_ROUTES.MESSAGES },
-  { name: "Onboarding", icon: <OnboardingIcon />, path: PAGE_ROUTES.ONBOARDING },
-];
+const navItems: NavItem[] = MAIN_NAV_ITEMS.map((item) => ({
+  ...item,
+  icon: resolveNavIcon(item.icon),
+}));
 
-const managementItems: NavItem[] = [
-  // { name: "Users",      icon: <UsersIcon />,    path: PAGE_ROUTES.USERS },
-  // { name: "Roles",      icon: <RolesIcon />,    path: PAGE_ROUTES.ROLES },
-  { name: "Webhooks",   icon: <WebhooksIcon />, path: PAGE_ROUTES.WEBHOOKS },
-  { name: "Audit Logs", icon: <AuditIcon />,    path: PAGE_ROUTES.AUDIT_LOGS },
-];
+const managementItems: NavItem[] = MANAGEMENT_NAV_ITEMS.map((item) => ({
+  ...item,
+  icon: resolveNavIcon(item.icon),
+}));
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, toggleSidebar, toggleMobileSidebar, closeMobileSidebar } = useSidebar();
@@ -163,20 +154,20 @@ const AppSidebar: React.FC = () => {
         {/* Logo */}
         <div className="flex items-center h-16 px-4 border-b border-gray-200/20 dark:border-gray-700 shrink-0 bg-gradient-to-r from-[#128C7E] to-[#25D366] dark:from-[#0d2d2a] dark:to-[#0f3d30]">
           {show ? (
-            <Image src="/images/logo/logo-dark.svg" alt="WhatsApp Hub" width={160} height={36} priority />
+            <Image src="/images/logo/logo-dark.svg" alt={APP_CONFIG.logoAlt} width={160} height={36} priority />
           ) : (
-            <Image src="/images/logo/logo-icon.svg" alt="WhatsApp Hub" width={36} height={36} priority />
+            <Image src="/images/logo/logo-icon.svg" alt={APP_CONFIG.logoAlt} width={36} height={36} priority />
           )}
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
           <div>
-            {show && <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2 mb-2">Main</p>}
+            {show && <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2 mb-2">{NAV_SECTION_LABELS.main}</p>}
             {renderMenuItems(navItems)}
           </div>
           <div>
-            {show && <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2 mb-2">Management</p>}
+            {show && <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-2 mb-2">{NAV_SECTION_LABELS.management}</p>}
             {renderMenuItems(managementItems)}
           </div>
         </nav>
@@ -203,7 +194,7 @@ const AppSidebar: React.FC = () => {
                 <TermsOfServiceLink className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400" />
                 <PrivacyPolicyLink className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400" />
                 <DataDeletionLink
-                  label="Data Deletion"
+                  label={FOOTER_LINK_LABELS.dataDeletion}
                   className="block text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400"
                 />
               </>
@@ -211,21 +202,21 @@ const AppSidebar: React.FC = () => {
               <>
                 <Link
                   href={PAGE_ROUTES.TERMS}
-                  title="Terms of Service"
+                  title={FOOTER_LINK_LABELS.terms}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-emerald-400"
                 >
                   <TermsIcon />
                 </Link>
                 <Link
                   href={PAGE_ROUTES.PRIVACY}
-                  title="Privacy Policy"
+                  title={FOOTER_LINK_LABELS.privacy}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-emerald-400"
                 >
                   <PolicyIcon />
                 </Link>
                 <Link
                   href={PAGE_ROUTES.DATA_DELETION}
-                  title="Data Deletion Instructions"
+                  title={FOOTER_LINK_LABELS.dataDeletionTitle}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-emerald-400"
                 >
                   <DeletionIcon />
@@ -243,15 +234,15 @@ const AppSidebar: React.FC = () => {
         }`}
       >
         <div className="flex items-center h-16 px-4 border-b border-gray-200/20 dark:border-gray-700 shrink-0 bg-gradient-to-r from-[#128C7E] to-[#25D366] dark:from-[#0d2d2a] dark:to-[#0f3d30]">
-          <Image src="/images/logo/logo-dark.svg" alt="WhatsApp Hub" width={160} height={36} priority />
+          <Image src="/images/logo/logo-dark.svg" alt={APP_CONFIG.logoAlt} width={160} height={36} priority />
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Main</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">{NAV_SECTION_LABELS.main}</p>
             {renderMenuItems(navItems)}
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Management</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">{NAV_SECTION_LABELS.management}</p>
             {renderMenuItems(managementItems)}
           </div>
         </nav>

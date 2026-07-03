@@ -4,8 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/query/keys";
 import { apiFetch } from "@/lib/http";
 import type { AuditLogPage, ListAuditLogsParams } from "../types";
-
-const DEFAULT_LIMIT = 25;
+import { PAGINATION_DEFAULTS } from "@/lib/constants";
 
 type AuditFilters = Omit<ListAuditLogsParams, "page" | "limit">;
 
@@ -15,7 +14,7 @@ type AuditFilters = Omit<ListAuditLogsParams, "page" | "limit">;
  */
 export function useInfiniteAuditLogs(
   filters: AuditFilters = {},
-  limit: number = DEFAULT_LIMIT
+  limit: number = PAGINATION_DEFAULTS.auditLogLimit
 ) {
   return useInfiniteQuery<AuditLogPage>({
     queryKey: queryKeys.auditLogs.list({ ...filters, limit }),
