@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { getApiBaseUrl } from "@/lib/env";
 import type {
   HealthCheckResult,
   HealthData,
@@ -7,7 +7,7 @@ import type {
   SystemHealthStatus,
 } from "../types";
 
-const API_BASE = env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
+const API_BASE = getApiBaseUrl();
 
 type ApiSuccess<T> = { success: true; data: T };
 
@@ -29,6 +29,7 @@ export async function fetchHealthEndpoint(
 ): Promise<HealthCheckResult> {
   const res = await fetch(`${API_BASE}/${path}`, {
     headers: { Accept: "application/json" },
+    credentials: "include",
   });
   const json = await parseJson(res);
 

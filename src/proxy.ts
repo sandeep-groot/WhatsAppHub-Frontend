@@ -1,4 +1,8 @@
-import { AUTH_SESSION_COOKIE, isPublicPath } from "@/lib/auth/constants";
+import {
+  AUTH_COOKIE_NAMES,
+  isPublicPath,
+  resolvePostLoginPath,
+} from "@/lib/auth/constants";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -6,6 +10,10 @@ const AUTH_PATH_PREFIXES = ["/login", "/signup", "/forgot-password", "/signin"];
 
 function isAuthPath(pathname: string): boolean {
   return AUTH_PATH_PREFIXES.some((path) => pathname.startsWith(path));
+}
+
+function hasAuthSession(request: NextRequest): boolean {
+  return AUTH_COOKIE_NAMES.some((name) => request.cookies.has(name));
 }
 
 function applySecurityHeaders(response: NextResponse): NextResponse {
@@ -17,7 +25,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasSession = request.cookies.has(AUTH_SESSION_COOKIE);
+  const hasSession = hasAuthSession(request);
   const isAuthRoute = isAuthPath(pathname);
 
   if (pathname.startsWith("/signin")) {
@@ -32,7 +40,9 @@ export function proxy(request: NextRequest) {
   }
 
   if (isAuthRoute && hasSession) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const redirect = request.nextUrl.searchParams.get("redirect");
+    const target = resolvePostLoginPath(redirect);
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
   if (!isAuthRoute && !hasSession && !isPublicPath(pathname)) {

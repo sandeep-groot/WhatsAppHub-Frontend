@@ -8,6 +8,7 @@ import Button from "@/components/ui/button/Button";
 import { useAuth } from "@/context/AuthContext";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import { SESSION_EXPIRED_MESSAGE } from "@/lib/auth/session-events";
+import { resolvePostLoginPath } from "@/lib/auth/constants";
 import { PAGE_ROUTES } from "@/lib/constants";
 import { ApiError } from "@/lib/http";
 import Link from "next/link";
@@ -45,8 +46,8 @@ export default function SignInForm() {
 
     try {
       await login(email.trim(), password);
-      const destination =
-        redirect && redirect.startsWith("/") ? redirect : PAGE_ROUTES.DASHBOARD;
+      const destination = resolvePostLoginPath(redirect, PAGE_ROUTES.DASHBOARD);
+      router.refresh();
       router.replace(destination);
     } catch (err) {
       if (err instanceof ApiError) {

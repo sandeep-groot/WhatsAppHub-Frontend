@@ -23,9 +23,10 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
   user: AuthUser;
+  /** Present when the backend also returns tokens in the body (optional with cookie auth). */
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 export interface SignupRequest {

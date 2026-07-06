@@ -17,8 +17,8 @@ export interface OnboardingStatus {
 }
 
 export interface WabaBindRequest {
-  code: string;
+  // code: string;
   wabaId: string;
   phoneNumberId: string;
-  solutionId: string;
+  // solutionId: string;
 }

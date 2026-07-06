@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { resolvePostLoginPath } from "@/lib/auth/constants";
 import { PAGE_ROUTES } from "@/lib/constants";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -18,8 +19,7 @@ export default function RedirectIfAuthenticated({
   useEffect(() => {
     if (isLoading || !isAuthenticated) return;
 
-    const destination =
-      redirect && redirect.startsWith("/") ? redirect : PAGE_ROUTES.DASHBOARD;
+    const destination = resolvePostLoginPath(redirect, PAGE_ROUTES.DASHBOARD);
     router.replace(destination);
   }, [isAuthenticated, isLoading, redirect, router]);
 

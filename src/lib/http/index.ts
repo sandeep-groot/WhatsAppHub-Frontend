@@ -17,10 +17,10 @@ function parseBody(body?: string): unknown {
 }
 
 /**
- * Typed API helper backed by axios (interceptors: auth header, 401 refresh + retry).
+ * Typed API helper backed by axios (withCredentials + 401 cookie refresh + retry).
  */
 export async function apiFetch<T>(url: string, options: ApiRequestConfig = {}): Promise<T> {
-  const { method = "GET", data, body, headers, skipAuth, skipAuthRefresh } = options;
+  const { method = "GET", data, body, headers, skipAuth, skipAuthRefresh, withCredentials } = options;
   const payload = data ?? parseBody(body);
 
   try {
@@ -31,6 +31,7 @@ export async function apiFetch<T>(url: string, options: ApiRequestConfig = {}): 
       headers,
       skipAuth,
       skipAuthRefresh,
+      withCredentials,
     } as Parameters<typeof apiClient.request>[0]);
 
     if (response.status === 204) {

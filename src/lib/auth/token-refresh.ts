@@ -1,63 +1,45 @@
 import { API_ROUTES } from "@/lib/constants";
-import { env } from "@/lib/env";
+import { getApiBaseUrl } from "@/lib/env";
 import type { ApiResponseBody } from "@/lib/http/types";
 import type { LoginResponse } from "@/modules/auth/types";
 import axios from "axios";
-import {
-  clearAuthSession,
-  getRefreshToken,
-  getStoredUser,
-  setAuthSession,
-  type StoredAuthUser,
-} from "./index";
-import { scheduleProactiveRefresh, clearProactiveRefresh } from "./proactive-refresh";
+import { clearAuthSession, getStoredUser, setStoredUser } from "./index";
 import { toStoredUser } from "./user-mapper";
 
 const refreshClient = axios.create({
-  baseURL: env.NEXT_PUBLIC_API_URL.replace(/\/$/, ""),
+  baseURL: getApiBaseUrl(),
   headers: { "Content-Type": "application/json" },
+  withCredentials: true,
 });
 
 let refreshPromise: Promise<boolean> | null = null;
 
 async function performRefresh(): Promise<boolean> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) {
-    clearAuthSession();
-    clearProactiveRefresh();
-    return false;
-  }
-
   try {
     const response = await refreshClient.post<ApiResponseBody<LoginResponse>>(
       API_ROUTES.AUTH.REFRESH,
-      { refreshToken },
+      {},
     );
 
     const body = response.data;
-    if (!body.success || !body.data) {
+    if (!body.success) {
       clearAuthSession();
-      clearProactiveRefresh();
       return false;
     }
 
-    const { accessToken, refreshToken: newRefresh, user } = body.data;
-    const storedUser: StoredAuthUser = user
-      ? toStoredUser(user)
-      : (getStoredUser() as StoredAuthUser);
-
-    if (!storedUser) {
-      clearAuthSession();
-      clearProactiveRefresh();
-      return false;
+    if (body.data?.user) {
+      setStoredUser(toStoredUser(body.data.user));
+    } else {
+      const cached = getStoredUser();
+      if (!cached) {
+        clearAuthSession();
+        return false;
+      }
     }
 
-    setAuthSession(accessToken, storedUser, newRefresh);
-    scheduleProactiveRefresh(accessToken, () => refreshAccessToken());
     return true;
   } catch {
     clearAuthSession();
-    clearProactiveRefresh();
     return false;
   }
 }
@@ -70,12 +52,4 @@ export function refreshAccessToken(): Promise<boolean> {
     });
   }
   return refreshPromise;
-}
-
-export function startProactiveRefresh(accessToken: string): void {
-  scheduleProactiveRefresh(accessToken, () => refreshAccessToken());
-}
-
-export function stopProactiveRefresh(): void {
-  clearProactiveRefresh();
 }

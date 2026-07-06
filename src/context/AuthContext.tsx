@@ -3,14 +3,10 @@
 import {
   getCurrentUser,
   loginWithCredentials,
+  logoutSession,
 } from "@/lib/auth/auth.service";
-import {
-  clearAuthSession,
-  getAuthToken,
-  type StoredAuthUser,
-} from "@/lib/auth";
+import { clearAuthSession, getStoredUser, type StoredAuthUser } from "@/lib/auth";
 import { onSessionExpired } from "@/lib/auth/session-events";
-import { startProactiveRefresh } from "@/lib/auth/token-refresh";
 import { PAGE_ROUTES } from "@/lib/constants";
 import { ApiError } from "@/lib/http";
 import { useRouter } from "next/navigation";
@@ -43,40 +39,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessionExpiredMessage, setSessionExpiredMessage] = useState<string | null>(
     null,
   );
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
 
   const clearSessionExpiredMessage = useCallback(() => {
     setSessionExpiredMessage(null);
   }, []);
 
-  const handleSessionExpired = useCallback(
-    (message: string) => {
-      setIsAuthenticated(false);
-      setUser(null);
-      setSessionExpiredMessage(message);
-      const loginUrl = new URL(PAGE_ROUTES.LOGIN, window.location.origin);
-      loginUrl.searchParams.set("sessionExpired", "1");
-      router.replace(loginUrl.pathname + loginUrl.search);
-    },
-    [router],
-  );
+  const handleSessionExpired = useCallback((message: string) => {
+    setIsAuthenticated(false);
+    setUser(null);
+    setSessionExpiredMessage(message);
+    const loginUrl = new URL(PAGE_ROUTES.LOGIN, window.location.origin);
+    loginUrl.searchParams.set("sessionExpired", "1");
+    setPendingRedirect(loginUrl.pathname + loginUrl.search);
+  }, []);
 
   useEffect(() => {
     return onSessionExpired(handleSessionExpired);
   }, [handleSessionExpired]);
 
-  const refreshUser = useCallback(async (): Promise<boolean> => {
-    const token = getAuthToken();
-    if (!token) {
-      setIsAuthenticated(false);
-      setUser(null);
-      return false;
-    }
+  useEffect(() => {
+    if (!pendingRedirect) return;
+    router.replace(pendingRedirect);
+    setPendingRedirect(null);
+  }, [pendingRedirect, router]);
 
+  const refreshUser = useCallback(async (): Promise<boolean> => {
     try {
       const profile = await getCurrentUser();
       setIsAuthenticated(true);
       setUser(profile);
-      startProactiveRefresh(token);
       return true;
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -92,19 +84,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
 
     async function bootstrap() {
-      const token = getAuthToken();
-
-      if (!token) {
-        if (!cancelled) {
-          setIsAuthenticated(false);
-          setUser(null);
-          setIsLoading(false);
-        }
-        return;
+      const cachedUser = getStoredUser();
+      if (cachedUser && !cancelled) {
+        setUser(cachedUser);
       }
 
-      await refreshUser();
+      const ok = await refreshUser();
       if (!cancelled) {
+        if (!ok) {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
         setIsLoading(false);
       }
     }
@@ -139,11 +129,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const logout = useCallback(() => {
-    clearAuthSession();
-    setIsAuthenticated(false);
-    setUser(null);
-    clearSessionExpiredMessage();
-    router.replace(PAGE_ROUTES.LOGIN);
+    void logoutSession().finally(() => {
+      setIsAuthenticated(false);
+      setUser(null);
+      clearSessionExpiredMessage();
+      router.replace(PAGE_ROUTES.LOGIN);
+    });
   }, [router, clearSessionExpiredMessage]);
 
   return (

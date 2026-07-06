@@ -11,8 +11,10 @@ export type ApiRequestConfig = {
   /** @deprecated Prefer `data` — kept for callers passing JSON.stringify body */
   body?: string;
   headers?: Record<string, string>;
-  /** Skip attaching Authorization header */
-  skipAuth?: boolean;
-  /** Skip 401 refresh + retry (login, refresh endpoints) */
+  /** Skip 401 refresh + retry (login, logout, refresh endpoints) */
   skipAuthRefresh?: boolean;
+  /** @deprecated Cookie auth always sends credentials; kept for API compatibility */
+  skipAuth?: boolean;
+  /** @deprecated Cookie auth always sends credentials */
+  withCredentials?: boolean;
 };

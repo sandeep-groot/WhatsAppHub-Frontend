@@ -15,15 +15,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || isAuthenticated) return;
 
-    if (!isAuthenticated) {
-      const loginUrl = new URL(PAGE_ROUTES.LOGIN, window.location.origin);
-      if (pathname && pathname !== PAGE_ROUTES.LOGIN) {
-        loginUrl.searchParams.set("redirect", pathname);
-      }
-      router.replace(loginUrl.pathname + loginUrl.search);
+    const loginUrl = new URL(PAGE_ROUTES.LOGIN, window.location.origin);
+    if (pathname && pathname !== PAGE_ROUTES.LOGIN) {
+      loginUrl.searchParams.set("redirect", pathname);
     }
+    router.replace(loginUrl.pathname + loginUrl.search);
   }, [isAuthenticated, isLoading, pathname, router]);
 
   if (isLoading) {

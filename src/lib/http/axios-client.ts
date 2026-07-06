@@ -1,12 +1,8 @@
-import {
-  clearAuthSession,
-  getAuthToken,
-  getRefreshToken,
-} from "@/lib/auth";
+import { clearAuthSession } from "@/lib/auth";
 import { refreshAccessToken } from "@/lib/auth/token-refresh";
 import { notifySessionExpired } from "@/lib/auth/session-events";
 import { API_ROUTES } from "@/lib/constants";
-import { env } from "@/lib/env";
+import { getApiBaseUrl } from "@/lib/env";
 import axios, {
   type AxiosError,
   type AxiosInstance,
@@ -19,6 +15,7 @@ const AUTH_SKIP_REFRESH_PATHS = [
   API_ROUTES.AUTH.LOGIN,
   API_ROUTES.AUTH.SIGNUP,
   API_ROUTES.AUTH.REFRESH,
+  API_ROUTES.AUTH.LOGOUT,
 ] as const;
 
 function isSkipRefreshPath(url: string | undefined): boolean {
@@ -33,19 +30,19 @@ type RetryConfig = InternalAxiosRequestConfig & {
 };
 
 type QueueItem = {
-  resolve: (token: string) => void;
+  resolve: () => void;
   reject: (error: unknown) => void;
 };
 
 let isRefreshing = false;
 let failedQueue: QueueItem[] = [];
 
-function processQueue(error: unknown | null, token: string | null = null): void {
+function processQueue(error: unknown | null): void {
   failedQueue.forEach((item) => {
     if (error) {
       item.reject(error);
-    } else if (token) {
-      item.resolve(token);
+    } else {
+      item.resolve();
     }
   });
   failedQueue = [];
@@ -54,22 +51,13 @@ function processQueue(error: unknown | null, token: string | null = null): void 
 function handleAuthFailure(error: unknown): void {
   clearAuthSession();
   notifySessionExpired();
-  processQueue(error, null);
+  processQueue(error);
 }
 
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: env.NEXT_PUBLIC_API_URL.replace(/\/$/, ""),
+  baseURL: getApiBaseUrl(),
   headers: { "Content-Type": "application/json" },
-});
-
-apiClient.interceptors.request.use((config: RetryConfig) => {
-  if (!config.skipAuth) {
-    const token = getAuthToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
+  withCredentials: true,
 });
 
 apiClient.interceptors.response.use(
@@ -92,20 +80,10 @@ apiClient.interceptors.response.use(
       return Promise.reject(fromAxiosError(error));
     }
 
-    if (!getRefreshToken()) {
-      if (getAuthToken()) {
-        handleAuthFailure(error);
-      }
-      return Promise.reject(fromAxiosError(error));
-    }
-
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({
-          resolve: (token: string) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            resolve(apiClient(originalRequest));
-          },
+          resolve: () => resolve(apiClient(originalRequest)),
           reject,
         });
       });
@@ -121,14 +99,7 @@ apiClient.interceptors.response.use(
         return Promise.reject(fromAxiosError(error));
       }
 
-      const newToken = getAuthToken();
-      if (!newToken) {
-        handleAuthFailure(error);
-        return Promise.reject(fromAxiosError(error));
-      }
-
-      processQueue(null, newToken);
-      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+      processQueue(null);
       return apiClient(originalRequest);
     } catch (refreshError) {
       handleAuthFailure(refreshError);

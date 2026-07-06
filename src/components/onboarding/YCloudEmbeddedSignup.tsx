@@ -151,10 +151,10 @@ export default function YCloudEmbeddedSignup({
 
             try {
               const bindData: WabaBindRequest = {
-                code,
+                // code,
                 wabaId: capturedWabaId.current,
                 phoneNumberId: capturedPhoneId.current,
-                solutionId: solutionId,
+                // solutionId: solutionId,
               };
 
               // Send OAuth code and account IDs to your NestJS backend
