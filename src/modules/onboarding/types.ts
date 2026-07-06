@@ -16,9 +16,20 @@ export interface OnboardingStatus {
   completed: boolean;
 }
 
-export interface WabaBindRequest {
-  // code: string;
+/** Payload returned by YCloud / Meta embedded signup (Step I). */
+export interface EmbeddedSignupResult {
   wabaId: string;
   phoneNumberId: string;
-  // solutionId: string;
+  businessId?: string;
+  authCode?: string;
+}
+
+export interface WabaBindRequest {
+  wabaId: string;
+  phoneNumberId: string;
+}
+
+export interface WabaBindResponse {
+  success: boolean;
+  message?: string;
 }
