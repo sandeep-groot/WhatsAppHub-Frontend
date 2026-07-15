@@ -78,7 +78,3 @@ NEXT_PUBLIC_APP_NAME=WhatsAppHub
 ## 📄 License
 
 This project is proprietary and confidential.
-
----
-
-**Built with ❤️ for WhatsAppHub**

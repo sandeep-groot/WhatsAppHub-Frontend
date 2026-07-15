@@ -28,6 +28,10 @@ export function isPublicPath(pathname: string): boolean {
     AUTH_PUBLIC_PATHS.some((path) => pathname.startsWith(path)) ||
     pathname.startsWith("/signin") ||
     pathname.startsWith("/api/") ||
+    // Backend API is rewritten via next.config (/v1 → API_PROXY_TARGET). Must not
+    // be treated as a page route or auth proxy will redirect to /login.
+    pathname === "/v1" ||
+    pathname.startsWith("/v1/") ||
     pathname.startsWith("/_next/") ||
     pathname === "/favicon.ico" ||
     pathname.startsWith("/images/")
@@ -38,7 +42,13 @@ export function resolvePostLoginPath(
   redirect: string | null | undefined,
   fallback = "/dashboard",
 ): string {
-  if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
+  if (
+    redirect &&
+    redirect.startsWith("/") &&
+    !redirect.startsWith("//") &&
+    !redirect.startsWith("/v1/") &&
+    redirect !== "/v1"
+  ) {
     return redirect;
   }
   return fallback;

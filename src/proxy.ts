@@ -25,6 +25,12 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // API rewrite path — never apply page auth redirects here.
+  if (pathname === "/v1" || pathname.startsWith("/v1/")) {
+    return NextResponse.next();
+  }
+
   const hasSession = hasAuthSession(request);
   const isAuthRoute = isAuthPath(pathname);
 
@@ -55,5 +61,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|images|.*\\..*).*)"],
+  // Skip static assets and the /v1 API rewrite path entirely.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|images|v1/|.*\\..*).*)"],
 };
