@@ -159,22 +159,22 @@ export default function YCloudEmbeddedSignup({
   const isConfigured = Boolean(appId && configId && solutionId);
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center justify-center transition-all duration-300">
-      <div className="relative w-full">
+    <div className="flex w-full flex-col items-center justify-center space-y-4">
+      <div className="w-full max-w-md space-y-3">
         <Button
           type="button"
           onClick={handleLaunchSignup}
           disabled={disabled || !isSdkLoaded || isSigningUp || !isConfigured}
-          className={`flex w-full items-center justify-center gap-3 rounded-xl py-3 text-sm font-semibold transition-all duration-300 ${
+          className={`flex w-full items-center justify-center gap-3 rounded-2xl py-3.5 text-sm font-bold transition-all duration-200 ${
             isConfigured
-              ? "bg-[#1877f2] text-white shadow-sm shadow-[#1877f2]/20 hover:bg-[#166fe5] hover:shadow-md hover:shadow-[#1877f2]/30 active:scale-[0.98]"
-              : "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-700"
+              ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 active:scale-[0.98]"
+              : "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800"
           }`}
         >
           {isSigningUp ? (
-            <div className="flex items-center gap-2">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              <span>Connecting...</span>
+            <div className="flex items-center gap-2.5">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <span>Connecting to Meta...</span>
             </div>
           ) : (
             <>
@@ -185,25 +185,25 @@ export default function YCloudEmbeddedSignup({
         </Button>
 
         {isSigningUp && loadingText ? (
-          <p className="mt-3 animate-pulse text-center text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <p className="animate-pulse text-center text-xs font-semibold text-emerald-600 dark:text-emerald-400">
             {loadingText}
           </p>
         ) : null}
 
         {!isConfigured ? (
-          <div className="mt-4 rounded-xl border border-warning-100 bg-warning-50 p-3 text-center dark:border-warning-500/20 dark:bg-warning-500/10">
-            <p className="text-xs font-medium text-warning-700 dark:text-warning-400">
-              Credentials are not fully configured in your environment variables.
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center dark:border-amber-500/20 dark:bg-amber-500/10">
+            <p className="text-xs font-semibold text-amber-800 dark:text-amber-400">
+              Facebook App ID, Config ID, or Solution ID are not configured in your environment variables.
             </p>
           </div>
         ) : null}
 
         {isSdkLoaded && isConfigured && !isSigningUp && !disabled ? (
-          <div className="mb-1 mt-1 flex items-center justify-center gap-1.5">
-            <span className="h-1.5 w-1.5 animate-ping rounded-full bg-emerald-500" />
-            <p className="text-center text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+          <div className="flex items-center justify-center gap-2 pt-1">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-center text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               Ready to Connect
-            </p>
+            </span>
           </div>
         ) : null}
       </div>

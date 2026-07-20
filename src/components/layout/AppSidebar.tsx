@@ -87,12 +87,12 @@ const AppSidebar: React.FC = () => {
     };
   }, [isMobileOpen]);
 
-  // Icon box wrapper — gray bg normally, brand blue when active
+  // Icon box wrapper — gray bg normally, emerald gradient when active
   const iconBox = (active: boolean) =>
-    `flex items-center justify-center w-9 h-9 rounded-xl shrink-0 transition-colors duration-200 ${
+    `flex items-center justify-center w-9 h-9 rounded-xl shrink-0 transition-all duration-200 ${
       active
-        ? "bg-emerald-500 text-white shadow-sm"
-        : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 dark:group-hover:bg-gray-600 dark:group-hover:text-gray-300"
+        ? "bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/25"
+        : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:bg-emerald-100/70 group-hover:text-emerald-600 dark:group-hover:bg-gray-700 dark:group-hover:text-emerald-400"
     }`;
 
   const renderMenuItems = (items: NavItem[]) => (

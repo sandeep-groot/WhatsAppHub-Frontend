@@ -24,13 +24,13 @@ export const KPI_CARD_COPY: {
     key: "businessCount",
     label: "Business Accounts",
     subtitle: "Registered Meta businesses",
-    iconBg: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    iconBg: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   },
   {
     key: "wabaCount",
     label: "WABA Accounts",
     subtitle: "WhatsApp Business Accounts",
-    iconBg: "bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400",
+    iconBg: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   },
   {
     key: "phoneCount",
@@ -44,7 +44,15 @@ export const KPI_CARD_COPY: {
     subtitle: "Active phone numbers",
     showStatusDot: true,
     dotColor: "bg-emerald-500",
-    iconBg: "bg-success-50 dark:bg-success-500/10 text-success-600 dark:text-success-400",
+    iconBg: "bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400",
+  },
+  {
+    key: "pending",
+    label: "Pending",
+    subtitle: "Setup in progress",
+    showStatusDot: true,
+    dotColor: "bg-amber-500",
+    iconBg: "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400",
   },
 ];
 

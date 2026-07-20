@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { useTheme } from "@/context/ThemeContext";
 import { ProfileModal } from "@/components/auth/ProfileModal";
 import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
 import {
-  BellIcon,
-  ChevronDownIcon,
-  MenuIcon,
-  MoonIcon,
-  SearchIcon,
-  SunIcon,
+  BellIcon as Bell,
+  ChevronDownIcon as ChevronDown,
+  LogOutIcon as LogOut,
+  MenuIcon as Menu,
+  MoonIcon as Moon,
+  SunIcon as Sun,
+  UserIcon,
 } from "@/icons";
 
 const AppHeader: React.FC = () => {
@@ -47,58 +47,44 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <header className="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-800 transition-colors">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6">
 
-        {/* Left — mobile hamburger + search */}
+        {/* Left — mobile hamburger */}
         <div className="flex items-center gap-3">
           {/* Mobile-only hamburger */}
           <button
             onClick={toggleMobileSidebar}
-            className="lg:hidden p-2 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="lg:hidden p-2 text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-800 dark:text-gray-400 rounded-xl transition-colors"
             aria-label="Open menu"
           >
-            <MenuIcon />
+            <Menu className="w-5 h-5" />
           </button>
-
-          {/* Search */}
-          <div className="hidden sm:flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2">
-            <SearchIcon className="w-4 h-4 text-gray-500 shrink-0" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="bg-transparent outline-none text-sm w-40 md:w-56 text-gray-700 dark:text-gray-200 placeholder-gray-400"
-            />
-          </div>
         </div>
 
         {/* Right */}
-        <div className="flex items-center gap-1 sm:gap-2">
-
-          {/* Mobile search icon */}
-          <button className="sm:hidden p-2 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 rounded-lg transition-colors">
-            <SearchIcon className="w-5 h-5 text-gray-500" />
-          </button>
+        <div className="flex items-center gap-1.5 sm:gap-3">
 
           {/* Notifications */}
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              className="relative p-2 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="relative p-2 text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-800 dark:text-gray-400 rounded-xl transition-colors"
+              aria-label="Notifications"
             >
-              <BellIcon />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
             </button>
             {isNotificationOpen && (
-              <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Notifications</h3>
+              <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700 overflow-hidden animate-fade-in">
+                <div className="p-4 border-b border-gray-100 dark:border-gray-700/80">
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">Notifications</h3>
                 </div>
-                <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-80 overflow-y-auto">
-                  <div className="p-4 hover:bg-emerald-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">New message</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">You have a new message from Admin</p>
-                    <p className="text-xs text-gray-400 mt-1.5">2 minutes ago</p>
+                <div className="divide-y divide-gray-100 dark:divide-gray-700/60 max-h-80 overflow-y-auto">
+                  <div className="p-4 hover:bg-emerald-50/50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
+                    <p className="text-xs font-semibold text-gray-900 dark:text-white">System Update</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">WhatsApp connections are operating normally.</p>
+                    <p className="text-[10px] text-gray-400 mt-1.5">Just now</p>
                   </div>
                 </div>
               </div>
@@ -108,13 +94,13 @@ const AppHeader: React.FC = () => {
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-800 dark:text-gray-400 rounded-xl transition-colors"
             aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
           >
             {isDark ? (
-              <SunIcon className="w-5 h-5 text-yellow-400" />
+              <Sun className="w-5 h-5 text-amber-400" />
             ) : (
-              <MoonIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             )}
           </button>
 
@@ -122,24 +108,26 @@ const AppHeader: React.FC = () => {
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="group flex items-center gap-2 p-1.5 hover:bg-emerald-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="group flex items-center gap-2.5 p-1.5 hover:bg-emerald-50/80 dark:hover:bg-gray-800/80 rounded-xl transition-colors"
             >
-              <div className="w-8 h-8 bg-emerald-500 group-hover:bg-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 transition-colors ring-2 ring-transparent group-hover:ring-emerald-200 dark:group-hover:ring-emerald-800">
+              <div className="w-8 h-8 bg-gradient-to-tr from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm shadow-emerald-500/20">
                 {avatarLetter}
               </div>
-              <span className="hidden md:block text-sm font-medium text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
-                {displayName}
-              </span>
-              {roleLabel && (
-                <span className="hidden md:block text-xs text-emerald-600 dark:text-emerald-400">
-                  ({roleLabel})
+              <div className="hidden md:flex flex-col text-left">
+                <span className="text-xs font-bold text-gray-900 dark:text-white leading-tight">
+                  {displayName}
                 </span>
-              )}
-              <ChevronDownIcon className="hidden md:block w-4 h-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
+                {roleLabel && (
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    {roleLabel}
+                  </span>
+                )}
+              </div>
+              <ChevronDown className="hidden md:block w-4 h-4 text-gray-400 group-hover:text-emerald-600 transition-transform duration-200" />
             </button>
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <ul>
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden animate-fade-in">
+                <ul className="py-1">
                   <li>
                     <button
                       type="button"
@@ -147,24 +135,23 @@ const AppHeader: React.FC = () => {
                         setIsUserMenuOpen(false);
                         setIsProfileModalOpen(true);
                       }}
-                      className="w-full text-left block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 dark:hover:text-emerald-400 transition-colors"
+                      className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700/60 dark:hover:text-emerald-400 transition-colors"
                     >
-                      Profile
+                      <UserIcon className="w-4 h-4 text-gray-400" />
+                      <span>Profile</span>
                     </button>
                   </li>
-                  <li>
-                    {/* <Link href="#" className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700 dark:hover:text-emerald-400 transition-colors">Settings</Link> */}
-                  </li>
-                  <li className="border-t border-gray-100 dark:border-gray-700">
+                  <li className="border-t border-gray-100 dark:border-gray-700/80">
                     <button
                       type="button"
                       onClick={() => {
                         setIsUserMenuOpen(false);
                         setIsLogoutConfirmOpen(true);
                       }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                     >
-                      Logout
+                      <LogOut className="w-4 h-4 text-rose-500" />
+                      <span>Logout</span>
                     </button>
                   </li>
                 </ul>

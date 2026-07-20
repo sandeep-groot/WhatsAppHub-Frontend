@@ -120,14 +120,27 @@ export default function BindApiStep({
         </pre>
       </div>
 
-      <Button
+      <button
         type="button"
         onClick={() => void handleBind()}
         disabled={isBinding || isBound}
-        className="w-full"
+        className={`w-full flex items-center justify-center gap-2 py-3.5 px-6 text-sm font-bold rounded-2xl transition-all ${
+          isBound
+            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+            : "bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30"
+        } disabled:opacity-50`}
       >
-        {isBound ? "Account Bound" : isBinding ? "Binding..." : "Bind API"}
-      </Button>
+        {isBinding ? (
+          <div className="flex items-center gap-2.5">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span>Binding Account...</span>
+          </div>
+        ) : isBound ? (
+          "Account Bound Successfully"
+        ) : (
+          "Bind Account to WhatsAppHub"
+        )}
+      </button>
     </div>
   );
 }

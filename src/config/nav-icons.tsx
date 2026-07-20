@@ -6,6 +6,7 @@ import {
   DashboardIcon,
   OnboardingIcon,
   SendMessageIcon,
+  ShieldCheckIcon,
   UsersIcon,
   WebhooksIcon,
 } from "@/icons";
@@ -18,7 +19,7 @@ const NAV_ICON_MAP: Record<NavIconKey, ReactNode> = {
   sendMessage: <SendMessageIcon />,
   onboarding: <OnboardingIcon />,
   users: <UsersIcon />,
-  roles: <UsersIcon />,
+  roles: <ShieldCheckIcon />,
   webhooks: <WebhooksIcon />,
   auditLogs: <AuditIcon />,
   settings: <DashboardIcon />,

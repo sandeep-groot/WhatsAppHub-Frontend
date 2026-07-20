@@ -1,25 +1,28 @@
 "use client";
 
-import React, { useMemo, useState, Suspense, useEffect } from "react";
+import React, { useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/http";
 import { buildBusinessHierarchy } from "@/modules/clients/utils";
 import { useQuery } from "@tanstack/react-query";
 import {
-  BuildingIcon,
-  ChatBubbleDotsIcon,
-  CheckIcon,
-  ChevronDownWideIcon,
-  CloseIcon,
-  CopyDuplicateIcon,
-  FolderIcon,
-  GlobeIcon,
-  MessageDeliveredIcon,
-  MessageReadIcon,
-  MessageSentIcon,
-  SearchIcon,
+  BriefcaseBusinessIcon as BriefcaseBusiness,
+  CheckCheckIcon as CheckCheck,
+  CheckIcon as Check,
+  ChevronDownIcon as ChevronDown,
+  CloseIcon as X,
+  CopyDuplicateIcon as Copy,
+  EyeIcon as Eye,
+  FolderOpenIcon as FolderOpen,
+  MessageCircleIcon as MessageCircle,
+  MessageSquareIcon as MessageSquare,
+  PlusIcon as Plus,
+  SearchIcon as Search,
+  SmartphoneIcon as Smartphone,
+  WhatsAppIcon,
 } from "@/icons";
 import { EMPTY_STATE_COPY } from "@/lib/constants";
+
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                     */
@@ -104,11 +107,11 @@ type QualityMeta = { label: string; dot: string; text: string };
 function qualityMeta(rating?: string): QualityMeta {
   switch (rating) {
     case "GREEN":
-      return { label: "High", dot: "bg-success-500", text: "text-success-600 dark:text-success-400" };
+      return { label: "High", dot: "bg-emerald-500", text: "text-emerald-600 dark:text-emerald-400" };
     case "YELLOW":
-      return { label: "Medium", dot: "bg-warning-500", text: "text-warning-600 dark:text-warning-400" };
+      return { label: "Medium", dot: "bg-amber-500", text: "text-amber-600 dark:text-amber-400" };
     case "RED":
-      return { label: "Low", dot: "bg-error-500", text: "text-error-600 dark:text-error-400" };
+      return { label: "Low", dot: "bg-rose-500", text: "text-rose-600 dark:text-rose-400" };
     default:
       return { label: "Unknown", dot: "bg-gray-400", text: "text-gray-500" };
   }
@@ -117,23 +120,23 @@ function qualityMeta(rating?: string): QualityMeta {
 function statusMeta(status?: string): { label: string; dot: string } {
   const normalized = (status || "").toUpperCase();
   if (normalized === "CONNECTED" || normalized === "ACTIVE") {
-    return { label: "Connected", dot: "bg-success-500" };
+    return { label: "Connected", dot: "bg-emerald-500" };
   }
   if (normalized === "PENDING" || normalized === "IN_PROGRESS") {
-    return { label: titleCase(status), dot: "bg-warning-500" };
+    return { label: titleCase(status), dot: "bg-amber-500" };
   }
   return { label: titleCase(status), dot: "bg-gray-400" };
 }
 
-/* Small reusable pill */
+/* Reusable pill badge */
 function Pill({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "success" | "info" }) {
   const tones = {
-    neutral: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-    success: "bg-success-50 text-success-700 dark:bg-success-500/10 dark:text-success-400",
-    info: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
+    neutral: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/50",
+    success: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-500/20",
+    info: "bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400 border border-teal-200/60 dark:border-teal-500/20",
   };
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tones[tone]}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide ${tones[tone]}`}>
       {children}
     </span>
   );
@@ -171,16 +174,12 @@ function CopyButton({ value, label }: { value: string; label?: string }) {
       onClick={handleCopy}
       title={copied ? "Copied!" : `Copy ${label ?? "value"}`}
       aria-label={copied ? "Copied" : `Copy ${label ?? "value"}`}
-      className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors ${copied
-          ? "border-success-200 bg-success-50 text-success-600 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400"
-          : "border-gray-200 bg-white text-gray-400 hover:border-emerald-300 hover:text-emerald-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500 dark:hover:border-emerald-500/30 dark:hover:text-emerald-400"
+      className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-all duration-200 ${copied
+        ? "border-emerald-300 bg-emerald-50 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400"
+        : "border-gray-200 bg-white text-gray-400 hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:border-emerald-500/40 dark:hover:text-emerald-400"
         }`}
     >
-      {copied ? (
-        <CheckIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
-      ) : (
-        <CopyDuplicateIcon />
-      )}
+      {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
     </button>
   );
 }
@@ -255,22 +254,23 @@ function ClientsContent() {
   return (
     <div className="space-y-6 animate-fade-in pt-2">
       {/* Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-800 pb-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Clients</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+            <span>Clients & Business Accounts</span>
+          </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Business accounts, their WhatsApp Business Accounts (WABAs), and registered phone numbers.
+            Manage your Meta Business Accounts, WhatsApp Business Accounts (WABAs), and connected phone lines.
           </p>
         </div>
         <Link
           href="/onboarding"
-          className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm shadow-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold text-sm shadow-md shadow-emerald-500/20 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
         >
-          + Connect New WABA
+          <Plus className="w-4 h-4" />
+          <span>Connect New WABA</span>
         </Link>
       </div>
-
- 
 
       {/* Search */}
       <div className="relative w-full sm:w-96">
@@ -279,9 +279,9 @@ function ClientsContent() {
           placeholder="Search business, WABA, or number..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500"
+          className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700/70 bg-white dark:bg-gray-800/80 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 transition-all"
         />
-        <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
       </div>
 
       {/* Hierarchy as full-width grouped tables */}
@@ -291,9 +291,9 @@ function ClientsContent() {
           <p className="text-xs text-gray-400">{EMPTY_STATE_COPY.clients.loading}</p>
         </div>
       ) : filteredBusinesses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-600">
-            <FolderIcon />
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500">
+            <FolderOpen className="w-7 h-7" />
           </div>
           <h3 className="text-sm font-bold text-gray-900 dark:text-white mt-4">{EMPTY_STATE_COPY.clients.title}</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mt-1 leading-relaxed">
@@ -317,8 +317,8 @@ function ClientsContent() {
 
       {/* Details Drawer */}
       {drawerBusiness && (
-        <DetailsDrawer 
-          business={drawerBusiness} 
+        <DetailsDrawer
+          business={drawerBusiness}
           onClose={() => setDrawerBusinessId(null)}
           onOpenConsole={(phone) => setConsoleNumber(phone)}
         />
@@ -355,19 +355,19 @@ function BusinessTableCard({
   const verified = business.businessVerificationStatus?.toLowerCase() === "verified";
 
   return (
-    <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
-      {/* Business header — spread across full width */}
-      <div className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
-        <div onClick={onToggle} className="flex flex-1 items-center gap-3 text-left cursor-pointer select-none">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            <BuildingIcon />
+    <div className="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-800/90 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+      {/* Business header */}
+      <div className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between border-b border-gray-100 dark:border-gray-800/60">
+        <div onClick={onToggle} className="flex flex-1 items-center gap-3.5 text-left cursor-pointer select-none">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm">
+            <BriefcaseBusiness className="w-5.5 h-5.5" />
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-gray-900 dark:text-white truncate">{business.businessName}</h2>
               {verified ? <Pill tone="success">Verified</Pill> : <Pill>{titleCase(business.businessVerificationStatus)}</Pill>}
-              <ChevronDownWideIcon
-                className={`text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+              <ChevronDown
+                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
               />
             </div>
             <div className="mt-1 flex items-center gap-2">
@@ -377,41 +377,42 @@ function BusinessTableCard({
           </div>
         </div>
 
-        {/* Right cluster: summary + action, pushed to far right */}
+        {/* Right cluster: summary + action */}
         <div className="flex items-center gap-3 lg:justify-end">
-          <div className="flex items-center divide-x divide-gray-200 dark:divide-gray-700 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
-            <div className="px-4 py-2 text-center">
+          <div className="flex items-center divide-x divide-gray-200 dark:divide-gray-700/80 rounded-xl border border-gray-200/70 dark:border-gray-700/80 bg-gray-50/80 dark:bg-gray-900/40">
+            <div className="px-4 py-1.5 text-center">
               <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">{business.wabas.length}</p>
               <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mt-1">WABAs</p>
             </div>
-            <div className="px-4 py-2 text-center">
+            <div className="px-4 py-1.5 text-center">
               <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">{business.phoneCount}</p>
               <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mt-1">Numbers</p>
             </div>
           </div>
           <button
             onClick={onViewDetails}
-            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500/30 hover:bg-emerald-50/20 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+            className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-500/40 hover:bg-emerald-50/30 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm"
           >
-            View Details
+            <Eye className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+            <span>View Details</span>
           </button>
         </div>
       </div>
 
       {/* Full-width table */}
       {open && (
-        <div className="overflow-x-auto border-t border-gray-100 dark:border-gray-800">
+        <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] border-collapse text-left text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-900/50 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <thead className="bg-gray-50/80 dark:bg-gray-900/60 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
               <tr>
                 <th scope="col" className="px-5 py-3 w-[22%]">WABA Account</th>
                 <th scope="col" className="px-5 py-3 w-[20%]">WABA ID</th>
-                <th scope="col" className="px-5 py-3 w-[20%]">Phone Number</th>
+                <th scope="col" className="px-5 py-3 w-[22%]">Phone Number</th>
                 <th scope="col" className="px-5 py-3 text-center">Connection</th>
                 <th scope="col" className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
               {business.wabas.map((waba) => {
                 const rowCount = Math.max(waba.phoneNumbers.length, 1);
                 const wabaVerified = waba.businessVerificationStatus?.toLowerCase() === "verified";
@@ -420,34 +421,37 @@ function BusinessTableCard({
                 return phones.map((phone, idx) => (
                   <tr
                     key={phone ? phone.id : `${waba.id}-empty`}
-                    className={`${idx === 0 ? "border-t-2 border-gray-100 dark:border-gray-800" : "border-t border-dashed border-gray-100 dark:border-gray-800/60"} hover:bg-gray-50/50 dark:hover:bg-gray-900/20 transition-colors`}
+                    className="hover:bg-emerald-50/30 dark:hover:bg-emerald-500/5 transition-colors"
                   >
                     {idx === 0 && (
                       <>
-                        <td rowSpan={rowCount} className="px-5 py-3 align-top">
-                          <div className="flex items-start gap-2">
-                            <GlobeIcon className="mt-0.5 text-emerald-500 shrink-0" />
+                        <td rowSpan={rowCount} className="px-5 py-3.5 align-middle">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                              <WhatsAppIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                            </div>
                             <div className="min-w-0">
-                              <p className="font-bold text-gray-900 dark:text-white">{waba.name}</p>
+                              <p className="font-bold text-gray-900 dark:text-white leading-snug">{waba.name}</p>
                               {wabaVerified && (
-                                <span className="mt-1 inline-flex">
+                                <span className="mt-0.5 inline-flex">
                                   <Pill tone="info">Verified</Pill>
                                 </span>
                               )}
                             </div>
                           </div>
                         </td>
-                        <td rowSpan={rowCount} className="px-5 py-3 align-top">
+                        <td rowSpan={rowCount} className="px-5 py-3.5 align-middle">
                           <CopyableId value={waba.id} label="WABA ID" />
                         </td>
                       </>
                     )}
 
                     {/* Phone number */}
-                    <td className="px-5 py-3">
+                    <td className="px-5 py-3.5 align-middle">
                       {phone ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <span className="font-mono text-sm font-semibold text-gray-900 dark:text-white">{phone.displayPhoneNumber}</span>
+                        <span className="inline-flex items-center gap-2">
+                          <Smartphone className="w-3.5 h-3.5 text-gray-400" />
+                          <span className="font-mono text-xs font-semibold text-gray-900 dark:text-white">{phone.displayPhoneNumber}</span>
                           <CopyButton value={phone.displayPhoneNumber} label="phone number" />
                         </span>
                       ) : (
@@ -456,10 +460,10 @@ function BusinessTableCard({
                     </td>
 
                     {/* Connection */}
-                    <td className="px-5 py-3 text-center">
+                    <td className="px-5 py-3.5 text-center align-middle">
                       {phone ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">
-                          <span className={`h-1.5 w-1.5 rounded-full ${statusMeta(phone.status).dot}`} />
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/60 px-2.5 py-1 rounded-full border border-gray-200/60 dark:border-gray-800">
+                          <span className={`h-2 w-2 rounded-full ${statusMeta(phone.status).dot} animate-pulse`} />
                           {statusMeta(phone.status).label}
                         </span>
                       ) : (
@@ -468,13 +472,14 @@ function BusinessTableCard({
                     </td>
 
                     {/* Actions */}
-                    <td className="px-5 py-3 text-right">
+                    <td className="px-5 py-3.5 text-right align-middle">
                       {phone ? (
                         <button
                           onClick={() => onOpenConsole(phone)}
-                          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500/30 hover:bg-emerald-50/20 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                          className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-emerald-200/80 dark:border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-500/10 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white text-xs font-semibold text-emerald-700 dark:text-emerald-400 transition-all duration-200 shadow-sm"
                         >
-                          Console
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>Messages</span>
                         </button>
                       ) : (
                         <span className="text-gray-300 dark:text-gray-600">—</span>
@@ -529,10 +534,10 @@ function DetailsDrawer({
           </div>
           <button
             onClick={onClose}
-            className="shrink-0 flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            className="shrink-0 flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             aria-label="Close"
           >
-            <CloseIcon className="h-5 w-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -540,7 +545,7 @@ function DetailsDrawer({
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">WABA Accounts</p>
           {business.wabas.map((waba) => (
-            <div key={waba.id} className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40 p-4">
+            <div key={waba.id} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40 p-4">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white">{waba.name}</h3>
               <div className="mt-1 flex items-center gap-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">WABA ID</span>
@@ -562,11 +567,12 @@ function DetailsDrawer({
                     return (
                       <div
                         key={phone.id}
-                        className="flex flex-col gap-2 rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 shadow-sm"
+                        className="flex flex-col gap-2 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-3.5 shadow-sm"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-1.5 min-w-0">
-                            <span className="font-mono text-sm font-semibold text-gray-900 dark:text-white truncate">{phone.displayPhoneNumber}</span>
+                          <span className="inline-flex items-center gap-2 min-w-0">
+                            <Smartphone className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="font-mono text-xs font-semibold text-gray-900 dark:text-white truncate">{phone.displayPhoneNumber}</span>
                             <CopyButton value={phone.displayPhoneNumber} label="phone number" />
                           </span>
                           <div className="flex items-center gap-2 shrink-0">
@@ -580,15 +586,16 @@ function DetailsDrawer({
                             </span>
                           </div>
                         </div>
-                        <div className="flex justify-end border-t border-gray-50 dark:border-gray-800/40 pt-2 mt-1">
+                        <div className="flex justify-end border-t border-gray-50 dark:border-gray-800/40 pt-2.5 mt-1">
                           <button
                             onClick={() => {
                               onClose();
                               onOpenConsole(phone);
                             }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500/30 hover:bg-emerald-50/20 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/30 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all"
                           >
-                            Open Console
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>Messages</span>
                           </button>
                         </div>
                       </div>
@@ -682,18 +689,18 @@ function ConsoleDrawer({
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              WhatsApp Message Console
+              <span>WhatsApp Conversations</span>
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Monitoring line: <span className="font-mono font-semibold">{phone.displayPhoneNumber}</span>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              Business Number: <span className="font-mono font-semibold">{phone.displayPhoneNumber}</span>
             </p>
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             aria-label="Close"
           >
-            <CloseIcon className="h-5 w-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -709,9 +716,9 @@ function ConsoleDrawer({
                   placeholder="Search customers..."
                   value={customerSearch}
                   onChange={(e) => setCustomerSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                 />
-                <SearchIcon className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400" />
+                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400" />
               </div>
             </div>
 
@@ -719,8 +726,8 @@ function ConsoleDrawer({
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
               {loadingCustomers ? (
                 <div className="flex flex-col gap-2 p-3">
-                  <div className="h-10 w-full animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
-                  <div className="h-10 w-full animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+                  <div className="h-10 w-full animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
+                  <div className="h-10 w-full animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
                 </div>
               ) : filteredCustomers.length === 0 ? (
                 <div className="text-center py-10 px-3 text-xs text-gray-400">
@@ -733,19 +740,17 @@ function ConsoleDrawer({
                     <button
                       key={customer.customerNumber}
                       onClick={() => setSelectedCustomer(customer.customerNumber)}
-                      className={`w-full flex flex-col text-left px-3 py-2.5 rounded-xl transition-all duration-150 ${
-                        isActive
-                          ? "bg-emerald-500 text-white shadow-sm"
-                          : "hover:bg-gray-100/70 dark:hover:bg-gray-800/40 text-gray-700 dark:text-gray-300"
-                      }`}
+                      className={`w-full flex flex-col text-left px-3 py-2.5 rounded-xl transition-all duration-150 ${isActive
+                        ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm"
+                        : "hover:bg-gray-100/70 dark:hover:bg-gray-800/40 text-gray-700 dark:text-gray-300"
+                        }`}
                     >
                       <span className="font-semibold text-xs truncate">
                         {customer.customerName || "Unknown Customer"}
                       </span>
                       <span
-                        className={`font-mono text-[10px] mt-0.5 ${
-                          isActive ? "text-emerald-100" : "text-gray-400"
-                        }`}
+                        className={`font-mono text-[10px] mt-0.5 ${isActive ? "text-emerald-100" : "text-gray-400"
+                          }`}
                       >
                         {customer.customerNumber}
                       </span>
@@ -776,8 +781,8 @@ function ConsoleDrawer({
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30 dark:bg-gray-950/5">
                   {loadingMessages && !messages ? (
                     <div className="flex flex-col gap-3 py-4">
-                      <div className="h-12 w-2/3 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-                      <div className="h-12 w-2/3 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse align-self-end ml-auto" />
+                      <div className="h-12 w-2/3 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+                      <div className="h-12 w-2/3 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse align-self-end ml-auto" />
                     </div>
                   ) : messages?.length === 0 ? (
                     <div className="text-center py-20 text-xs text-gray-400">
@@ -798,30 +803,22 @@ function ConsoleDrawer({
                       return (
                         <div
                           key={msg.id}
-                          className={`flex flex-col max-w-[80%] ${
-                            isOutbound ? "ml-auto items-end" : "mr-auto items-start"
-                          }`}
+                          className={`flex flex-col max-w-[80%] ${isOutbound ? "ml-auto items-end" : "mr-auto items-start"
+                            }`}
                         >
                           <div
-                            className={`px-3.5 py-2.5 rounded-2xl shadow-sm text-xs leading-relaxed ${
-                              isOutbound
-                                ? "bg-emerald-500 text-white rounded-tr-none"
-                                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 rounded-tl-none"
-                            }`}
+                            className={`px-3.5 py-2.5 rounded-2xl shadow-sm text-xs leading-relaxed ${isOutbound
+                              ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-tr-none"
+                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 rounded-tl-none border border-gray-200/50 dark:border-gray-700/50"
+                              }`}
                           >
                             <p className="whitespace-pre-wrap">{msg.messageText}</p>
                           </div>
                           <span className="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
                             <span>{date}, {time}</span>
                             {isOutbound && (
-                              <span className="flex items-center">
-                                {msg.status === "READ" ? (
-                                  <MessageReadIcon className="text-emerald-500 dark:text-emerald-400" />
-                                ) : msg.status === "DELIVERED" ? (
-                                  <MessageDeliveredIcon />
-                                ) : (
-                                  <MessageSentIcon />
-                                )}
+                              <span className="flex items-center text-emerald-500">
+                                <CheckCheck className="w-3.5 h-3.5" />
                               </span>
                             )}
                           </span>
@@ -833,7 +830,7 @@ function ConsoleDrawer({
               </>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-gray-400">
-                <ChatBubbleDotsIcon className="text-gray-300 mb-2" />
+                <MessageSquare className="w-8 h-8 text-gray-300 dark:text-gray-700 mb-2" />
                 <p className="text-xs">{EMPTY_STATE_COPY.messageConsole.description}</p>
               </div>
             )}

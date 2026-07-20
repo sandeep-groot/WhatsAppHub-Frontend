@@ -3,19 +3,20 @@
 import React from "react";
 import type { AccountKpis } from "@/modules/clients/types";
 import {
-  BusinessAccountIcon,
+  BriefcaseBusinessIcon,
   CheckCircleIcon,
-  MessageSquareIcon,
   PhoneIcon,
+  RotateIcon,
+  WhatsAppIcon,
 } from "@/icons";
 import { KPI_CARD_COPY } from "@/lib/constants";
 
 const KPI_ICONS: Record<keyof AccountKpis, React.ReactNode> = {
-  businessCount: <BusinessAccountIcon />,
-  wabaCount: <MessageSquareIcon />,
+  businessCount: <BriefcaseBusinessIcon className="w-5 h-5" />,
+  wabaCount: <WhatsAppIcon className="w-5 h-5" />,
   phoneCount: <PhoneIcon />,
   connected: <CheckCircleIcon />,
-  pending: <CheckCircleIcon />,
+  pending: <RotateIcon />,
   inactive: <CheckCircleIcon />,
 };
 
@@ -49,12 +50,18 @@ export function AccountsKpiCards({
   if (isLoading) {
     return (
       <div
-        className={`grid gap-4 ${compact ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"}`}
+        className={`grid gap-4 ${
+          compact
+            ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+            : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+        }`}
       >
-        {Array.from({ length: 4 }).map((_, i) => (
+        {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className={`rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 animate-pulse ${compact ? "h-20" : "h-28"}`}
+            className={`rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 animate-pulse ${
+              compact ? "h-20" : "h-28"
+            }`}
           />
         ))}
       </div>
@@ -64,12 +71,18 @@ export function AccountsKpiCards({
   return (
     <div className="space-y-3">
       <div
-        className={`grid gap-4 ${compact ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"}`}
+        className={`grid gap-4 ${
+          compact
+            ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+            : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+        }`}
       >
         {KPI_CARDS.map((card) => (
           <div
             key={card.key}
-            className={`rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 hover:shadow-md ${compact ? "p-4" : "p-5"}`}
+            className={`rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 hover:shadow-md ${
+              compact ? "p-4" : "p-5"
+            }`}
           >
             <div className="flex items-center justify-between">
               <div className="min-w-0">
@@ -83,7 +96,9 @@ export function AccountsKpiCards({
                     />
                   )}
                   <p
-                    className={`font-extrabold text-gray-900 dark:text-white ${compact ? "text-xl" : "text-3xl"}`}
+                    className={`font-extrabold text-gray-900 dark:text-white ${
+                      compact ? "text-xl" : "text-3xl"
+                    }`}
                   >
                     {kpis[card.key]}
                   </p>
@@ -103,24 +118,6 @@ export function AccountsKpiCards({
           </div>
         ))}
       </div>
-
-      {/* Secondary status row */}
-      {!compact && (kpis.pending > 0 || kpis.inactive > 0) && (
-        <div className="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400 px-1">
-          {kpis.pending > 0 && (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-              {kpis.pending} pending
-            </span>
-          )}
-          {kpis.inactive > 0 && (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
-              {kpis.inactive} inactive / disconnected
-            </span>
-          )}
-        </div>
-      )}
     </div>
   );
 }
