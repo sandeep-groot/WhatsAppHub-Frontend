@@ -147,7 +147,7 @@ export function WebhookList({ webhooks, onEdit, onDelete, onShowSecret }: Webhoo
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                   Status
                 </th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-left">
                   Actions
                 </th>
               </tr>
@@ -185,7 +185,7 @@ export function WebhookList({ webhooks, onEdit, onDelete, onShowSecret }: Webhoo
                   </td>
 
                   {/* Actions */}
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-left">
                     <ActionButtons
                       webhook={webhook}
                       copiedId={copiedId}
