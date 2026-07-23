@@ -149,9 +149,9 @@ export function WebhookFormModal({
         )}
 
         {/* URL */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
-            Endpoint URL
+        <div className="space-y-1.5">
+          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Endpoint URL <span className="text-rose-500">*</span>
           </label>
           <input
             type="url"
@@ -159,14 +159,14 @@ export function WebhookFormModal({
             disabled={isPending}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="e.g. https://your-server.com/webhooks/whatsapp"
-            className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-gray-900 dark:text-white transition-all disabled:opacity-50"
+            placeholder="Enter endpoint URL (e.g. https://your-domain.com/webhooks)"
+            className="w-full px-4 py-2.5 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-gray-900 dark:text-white transition-all disabled:opacity-50 placeholder-gray-400"
           />
         </div>
 
         {/* Description */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
+        <div className="space-y-1.5">
+          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             Description
           </label>
           <input
@@ -174,32 +174,43 @@ export function WebhookFormModal({
             disabled={isPending}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g. Receive message updates and outbound tracking"
-            className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-gray-900 dark:text-white transition-all disabled:opacity-50"
+            placeholder="Enter description"
+            className="w-full px-4 py-2.5 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-gray-900 dark:text-white transition-all disabled:opacity-50 placeholder-gray-400"
           />
         </div>
 
-        {/* Status */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
+        {/* Status Segmented Toggle */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             Endpoint Status
           </label>
-          <div className="flex gap-4">
-            {(["active", "disabled"] as WebhookStatus[]).map((s) => (
-              <label
-                key={s}
-                className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer capitalize"
-              >
-                <input
-                  type="radio"
-                  disabled={isPending}
-                  checked={status === s}
-                  onChange={() => setStatus(s)}
-                  className="w-4 h-4 text-emerald-500 border-gray-300 focus:ring-emerald-500"
-                />
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </label>
-            ))}
+          <div className="grid grid-cols-2 p-1 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-w-xs">
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => setStatus("active")}
+              className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                status === "active"
+                  ? "bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 shadow-xs"
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
+              }`}
+            >
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span>Active</span>
+            </button>
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => setStatus("disabled")}
+              className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                status === "disabled"
+                  ? "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 shadow-xs"
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
+              }`}
+            >
+              <span className="h-2 w-2 rounded-full bg-gray-400" />
+              <span>Disabled</span>
+            </button>
           </div>
         </div>
 
@@ -322,22 +333,22 @@ export function WebhookFormModal({
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100 dark:border-gray-700 mt-6">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800 mt-6">
           <button
             type="button"
             disabled={isPending}
             onClick={onClose}
-            className="px-4 py-2 text-sm font-semibold rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
+            className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isPending || isLoadingModal}
-            className="px-4 py-2 text-sm font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white shadow-sm shadow-emerald-500/20 transition-all disabled:opacity-50 flex items-center gap-1.5"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition-all disabled:opacity-50"
           >
             {isPending && (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             )}
             <span>{isEditing ? "Save Changes" : "Create Endpoint"}</span>
           </button>

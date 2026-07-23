@@ -5,9 +5,14 @@ import Link from "next/link";
 import { apiFetch } from "@/lib/http";
 import { buildBusinessHierarchy } from "@/modules/clients/utils";
 import { useQuery } from "@tanstack/react-query";
+import type {
+  WabaAccount,
+  PhoneNumber,
+  PagedResponse,
+  BusinessNode,
+} from "@/modules/clients/types";
 import {
   BriefcaseBusinessIcon as BriefcaseBusiness,
-  CheckCheckIcon as CheckCheck,
   CheckIcon as Check,
   ChevronDownIcon as ChevronDown,
   CloseIcon as X,
@@ -19,73 +24,21 @@ import {
   PlusIcon as Plus,
   SearchIcon as Search,
   SmartphoneIcon as Smartphone,
-  WhatsAppIcon,
 } from "@/icons";
 import { EMPTY_STATE_COPY } from "@/lib/constants";
+import ClientGroupCard, { ClientDetailMeta } from "@/components/clients/ClientGroupCard";
+import PortfolioSubCard from "@/components/clients/PortfolioSubCard";
 
+export interface GroupedClientNode {
+  clientDetail: ClientDetailMeta | null;
+  businesses: BusinessNode[];
+}
 
-/* -------------------------------------------------------------------------- */
-/*                                   Types                                     */
-/* -------------------------------------------------------------------------- */
-
-export interface WabaAccount {
+interface DbClient {
   id: string;
   name: string;
-  currency: string;
-  messageTemplateNamespace: string;
-  accountReviewStatus: string;
-  businessId: string;
-  businessStatus: string;
-  businessName: string;
-  businessVerificationStatus: string;
-  whatsappBusinessManagerMessagingLimit: string;
-  ownershipType: string;
-  primaryFundingId: string;
-  timezoneId: string;
-  paymentMethodAttached: boolean;
-  isOnBizApp: boolean;
-}
-
-export interface PhoneNumber {
-  id: string;
-  phoneNumber: string;
   wabaId: string;
-  verifiedName: string;
-  qualityRating: string;
-  messagingLimit: string;
-  whatsappBusinessManagerMessagingLimit: string;
-  isOfficialBusinessAccount: boolean;
-  codeVerificationStatus: string;
-  status: string;
-  displayPhoneNumber: string;
-  nameStatus: string;
-  newName?: string;
-  newNameStatus: string;
-  decision: string;
-  requestedVerifiedName: string;
-  rejectionReason?: string;
-  isOnBizApp: boolean;
-}
-
-export interface PagedResponse<T> {
-  offset: number;
-  limit: number;
-  length: number;
-  items: T[];
-}
-
-/* Derived hierarchy */
-interface WabaNode extends WabaAccount {
-  phoneNumbers: PhoneNumber[];
-}
-
-interface BusinessNode {
-  businessId: string;
-  businessName: string;
-  businessStatus: string;
-  businessVerificationStatus: string;
-  wabas: WabaNode[];
-  phoneCount: number;
+  clientDetail?: ClientDetailMeta | null;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -102,33 +55,6 @@ function titleCase(value?: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }
 
-type QualityMeta = { label: string; dot: string; text: string };
-
-function qualityMeta(rating?: string): QualityMeta {
-  switch (rating) {
-    case "GREEN":
-      return { label: "High", dot: "bg-emerald-500", text: "text-emerald-600 dark:text-emerald-400" };
-    case "YELLOW":
-      return { label: "Medium", dot: "bg-amber-500", text: "text-amber-600 dark:text-amber-400" };
-    case "RED":
-      return { label: "Low", dot: "bg-rose-500", text: "text-rose-600 dark:text-rose-400" };
-    default:
-      return { label: "Unknown", dot: "bg-gray-400", text: "text-gray-500" };
-  }
-}
-
-function statusMeta(status?: string): { label: string; dot: string } {
-  const normalized = (status || "").toUpperCase();
-  if (normalized === "CONNECTED" || normalized === "ACTIVE") {
-    return { label: "Connected", dot: "bg-emerald-500" };
-  }
-  if (normalized === "PENDING" || normalized === "IN_PROGRESS") {
-    return { label: titleCase(status), dot: "bg-amber-500" };
-  }
-  return { label: titleCase(status), dot: "bg-gray-400" };
-}
-
-/* Reusable pill badge */
 function Pill({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "success" | "info" }) {
   const tones = {
     neutral: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/50",
@@ -142,8 +68,7 @@ function Pill({ children, tone = "neutral" }: { children: React.ReactNode; tone?
   );
 }
 
-/* Copy-to-clipboard button with transient confirmation */
-function CopyButton({ value, label }: { value: string; label?: string }) {
+function CopyableId({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async (e: React.MouseEvent) => {
@@ -169,38 +94,26 @@ function CopyButton({ value, label }: { value: string; label?: string }) {
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      title={copied ? "Copied!" : `Copy ${label ?? "value"}`}
-      aria-label={copied ? "Copied" : `Copy ${label ?? "value"}`}
-      className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-all duration-200 ${copied
-        ? "border-emerald-300 bg-emerald-50 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400"
-        : "border-gray-200 bg-white text-gray-400 hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:border-emerald-500/40 dark:hover:text-emerald-400"
-        }`}
-    >
-      {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-    </button>
-  );
-}
-
-/* Monospace identifier paired with a copy button */
-function CopyableId({ value, label }: { value: string; label?: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="font-mono text-xs text-gray-600 dark:text-gray-300">{value}</span>
-      <CopyButton value={value} label={label} />
+    <span className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-gray-700 dark:text-gray-300">
+      <span>{value}</span>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors p-0.5"
+        title={copied ? "Copied!" : `Copy ${label}`}
+      >
+        {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+      </button>
     </span>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/*                                   Page                                      */
+/*                               Main Page Component                           */
 /* -------------------------------------------------------------------------- */
 
 function ClientsContent() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedBusiness, setExpandedBusiness] = useState<Record<string, boolean>>({});
   const [drawerBusinessId, setDrawerBusinessId] = useState<string | null>(null);
   const [consoleNumber, setConsoleNumber] = useState<PhoneNumber | null>(null);
 
@@ -220,63 +133,129 @@ function ClientsContent() {
     refetchInterval: 30000,
   });
 
-  const wabaPage = wabaData;
-  const phonePage = phoneData;
+  const { data: dbClients, refetch: refetchDbClients } = useQuery<DbClient[]>({
+    queryKey: ["db", "clients"],
+    queryFn: async () => apiFetch<DbClient[]>("/whatsapp/clients"),
+    refetchInterval: 30000,
+  });
+
   const isLoading = wabasLoading || phonesLoading;
 
   const businesses = useMemo(
-    () => buildBusinessHierarchy(wabaPage?.items ?? [], phonePage?.items ?? []),
-    [wabaPage, phonePage]
+    () => buildBusinessHierarchy(wabaData?.items ?? [], phoneData?.items ?? []),
+    [wabaData, phoneData]
   );
 
-  const filteredBusinesses = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return businesses;
-    return businesses.filter((b) => {
-      if (b.businessName.toLowerCase().includes(q)) return true;
-      if (b.businessId.includes(q)) return true;
-      return b.wabas.some(
-        (w) =>
-          w.name.toLowerCase().includes(q) ||
-          w.id.includes(q) ||
-          w.phoneNumbers.some(
-            (p) => p.displayPhoneNumber.toLowerCase().includes(q) || p.phoneNumber.includes(q)
-          )
+  // Group businesses by parent ClientDetail
+  const groupedClientNodes = useMemo<GroupedClientNode[]>(() => {
+    if (!businesses || businesses.length === 0) return [];
+
+    const mapByClientDetailId = new Map<string, GroupedClientNode>();
+    const unlinkedBusinesses: BusinessNode[] = [];
+
+    for (const business of businesses) {
+      const matchedDbC = dbClients?.find((dbC) =>
+        business.wabas.some((waba) => waba.id === dbC.wabaId)
       );
-    });
-  }, [businesses, searchQuery]);
+
+      if (matchedDbC?.clientDetail) {
+        const cd = matchedDbC.clientDetail;
+        const existing = mapByClientDetailId.get(cd.id) ?? {
+          clientDetail: cd,
+          businesses: [],
+        };
+        existing.businesses.push(business);
+        mapByClientDetailId.set(cd.id, existing);
+      } else {
+        unlinkedBusinesses.push(business);
+      }
+    }
+
+    const result = Array.from(mapByClientDetailId.values());
+    if (unlinkedBusinesses.length > 0) {
+      result.push({
+        clientDetail: null,
+        businesses: unlinkedBusinesses,
+      });
+    }
+
+    return result;
+  }, [businesses, dbClients]);
+
+  // Filter groups by searchQuery
+  const filteredGroups = useMemo<GroupedClientNode[]>(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return groupedClientNodes;
+
+    return groupedClientNodes
+      .map((group) => {
+        const cd = group.clientDetail;
+        const matchesClientHeader =
+          cd &&
+          (cd.name.toLowerCase().includes(q) ||
+            cd.email.toLowerCase().includes(q) ||
+            cd.phoneNumber.includes(q) ||
+            (cd.companyName && cd.companyName.toLowerCase().includes(q)));
+
+        if (matchesClientHeader) {
+          return group;
+        }
+
+        const matchingBusinesses = group.businesses.filter((b: BusinessNode) => {
+          if (b.businessName.toLowerCase().includes(q)) return true;
+          if (b.businessId.includes(q)) return true;
+          return b.wabas.some(
+            (w) =>
+              w.name.toLowerCase().includes(q) ||
+              w.id.includes(q) ||
+              w.phoneNumbers.some(
+                (p) =>
+                  p.displayPhoneNumber.toLowerCase().includes(q) ||
+                  p.phoneNumber.includes(q)
+              )
+          );
+        });
+
+        if (matchingBusinesses.length > 0) {
+          return {
+            ...group,
+            businesses: matchingBusinesses,
+          };
+        }
+
+        return null;
+      })
+      .filter((g): g is GroupedClientNode => g !== null);
+  }, [groupedClientNodes, searchQuery]);
 
   const drawerBusiness = businesses.find((b) => b.businessId === drawerBusinessId) ?? null;
 
-  const toggleBusiness = (id: string) =>
-    setExpandedBusiness((prev) => ({ ...prev, [id]: !prev[id] }));
-
   return (
     <div className="space-y-6 animate-fade-in pt-2">
-      {/* Header */}
+      {/* Page Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
-            <span>Clients & Business Accounts</span>
+          <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+            <span>Clients & Business Portfolios</span>
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Manage your Meta Business Accounts, WhatsApp Business Accounts (WABAs), and connected phone lines.
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">
+            Manage your parent client entities, Meta business portfolios, and WhatsApp numbers.
           </p>
         </div>
         <Link
           href="/onboarding"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold text-sm shadow-md shadow-emerald-500/20 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all active:scale-95 shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Connect New WABA</span>
         </Link>
       </div>
 
-      {/* Search */}
-      <div className="relative w-full sm:w-96">
+      {/* Search Bar */}
+      <div className="relative w-full max-w-md">
         <input
           type="text"
-          placeholder="Search business, WABA, or number..."
+          placeholder="Search client name, email, business ID, or phone number..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700/70 bg-white dark:bg-gray-800/80 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 transition-all"
@@ -284,14 +263,14 @@ function ClientsContent() {
         <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
       </div>
 
-      {/* Hierarchy as full-width grouped tables */}
+      {/* Main Data Render */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
           <p className="text-xs text-gray-400">{EMPTY_STATE_COPY.clients.loading}</p>
         </div>
-      ) : filteredBusinesses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm">
+      ) : filteredGroups.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-3xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500">
             <FolderOpen className="w-7 h-7" />
           </div>
@@ -301,15 +280,17 @@ function ClientsContent() {
           </p>
         </div>
       ) : (
-        <div className="space-y-5">
-          {filteredBusinesses.map((business) => (
-            <BusinessTableCard
-              key={business.businessId}
-              business={business}
-              open={expandedBusiness[business.businessId] ?? true}
-              onToggle={() => toggleBusiness(business.businessId)}
-              onViewDetails={() => setDrawerBusinessId(business.businessId)}
-              onOpenConsole={(phone) => setConsoleNumber(phone)}
+        <div className="space-y-6">
+          {filteredGroups.map((group, idx) => (
+            <ClientGroupCard
+              key={group.clientDetail?.id || `unlinked-${idx}`}
+              clientDetail={group.clientDetail}
+              businesses={group.businesses}
+              onViewDetails={(b: BusinessNode) => setDrawerBusinessId(b.businessId)}
+              onOpenConsole={(phone: PhoneNumber) => setConsoleNumber(phone)}
+              onRefresh={() => {
+                void refetchDbClients();
+              }}
             />
           ))}
         </div>
@@ -319,8 +300,13 @@ function ClientsContent() {
       {drawerBusiness && (
         <DetailsDrawer
           business={drawerBusiness}
+          clientDetail={
+            dbClients?.find((dbC) =>
+              drawerBusiness.wabas.some((waba) => waba.id === dbC.wabaId)
+            )?.clientDetail
+          }
           onClose={() => setDrawerBusinessId(null)}
-          onOpenConsole={(phone) => setConsoleNumber(phone)}
+          onOpenConsole={(phone: PhoneNumber) => setConsoleNumber(phone)}
         />
       )}
 
@@ -336,176 +322,17 @@ function ClientsContent() {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                          Business Account Table Card                        */
-/* -------------------------------------------------------------------------- */
-
-function BusinessTableCard({
-  business,
-  open,
-  onToggle,
-  onViewDetails,
-  onOpenConsole,
-}: {
-  business: BusinessNode;
-  open: boolean;
-  onToggle: () => void;
-  onViewDetails: () => void;
-  onOpenConsole: (phone: PhoneNumber) => void;
-}) {
-  const verified = business.businessVerificationStatus?.toLowerCase() === "verified";
-
-  return (
-    <div className="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-800/90 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-      {/* Business header */}
-      <div className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between border-b border-gray-100 dark:border-gray-800/60">
-        <div onClick={onToggle} className="flex flex-1 items-center gap-3.5 text-left cursor-pointer select-none">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm">
-            <BriefcaseBusiness className="w-5.5 h-5.5" />
-          </span>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-gray-900 dark:text-white truncate">{business.businessName}</h2>
-              {verified ? <Pill tone="success">Verified</Pill> : <Pill>{titleCase(business.businessVerificationStatus)}</Pill>}
-              <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-              />
-            </div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Business ID</span>
-              <CopyableId value={business.businessId} label="Business ID" />
-            </div>
-          </div>
-        </div>
-
-        {/* Right cluster: summary + action */}
-        <div className="flex items-center gap-3 lg:justify-end">
-          <div className="flex items-center divide-x divide-gray-200 dark:divide-gray-700/80 rounded-xl border border-gray-200/70 dark:border-gray-700/80 bg-gray-50/80 dark:bg-gray-900/40">
-            <div className="px-4 py-1.5 text-center">
-              <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">{business.wabas.length}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mt-1">WABAs</p>
-            </div>
-            <div className="px-4 py-1.5 text-center">
-              <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">{business.phoneCount}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mt-1">Numbers</p>
-            </div>
-          </div>
-          <button
-            onClick={onViewDetails}
-            className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-500/40 hover:bg-emerald-50/30 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm"
-          >
-            <Eye className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
-            <span>View Details</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Full-width table */}
-      {open && (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px] border-collapse text-left text-sm">
-            <thead className="bg-gray-50/80 dark:bg-gray-900/60 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
-              <tr>
-                <th scope="col" className="px-5 py-3 w-[22%]">WABA Account</th>
-                <th scope="col" className="px-5 py-3 w-[20%]">WABA ID</th>
-                <th scope="col" className="px-5 py-3 w-[22%]">Phone Number</th>
-                <th scope="col" className="px-5 py-3 text-center">Connection</th>
-                <th scope="col" className="px-5 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
-              {business.wabas.map((waba) => {
-                const rowCount = Math.max(waba.phoneNumbers.length, 1);
-                const wabaVerified = waba.businessVerificationStatus?.toLowerCase() === "verified";
-                const phones = waba.phoneNumbers.length > 0 ? waba.phoneNumbers : [null];
-
-                return phones.map((phone, idx) => (
-                  <tr
-                    key={phone ? phone.id : `${waba.id}-empty`}
-                    className="hover:bg-emerald-50/30 dark:hover:bg-emerald-500/5 transition-colors"
-                  >
-                    {idx === 0 && (
-                      <>
-                        <td rowSpan={rowCount} className="px-5 py-3.5 align-middle">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                              <WhatsAppIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-bold text-gray-900 dark:text-white leading-snug">{waba.name}</p>
-                              {wabaVerified && (
-                                <span className="mt-0.5 inline-flex">
-                                  <Pill tone="info">Verified</Pill>
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td rowSpan={rowCount} className="px-5 py-3.5 align-middle">
-                          <CopyableId value={waba.id} label="WABA ID" />
-                        </td>
-                      </>
-                    )}
-
-                    {/* Phone number */}
-                    <td className="px-5 py-3.5 align-middle">
-                      {phone ? (
-                        <span className="inline-flex items-center gap-2">
-                          <Smartphone className="w-3.5 h-3.5 text-gray-400" />
-                          <span className="font-mono text-xs font-semibold text-gray-900 dark:text-white">{phone.displayPhoneNumber}</span>
-                          <CopyButton value={phone.displayPhoneNumber} label="phone number" />
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-400">No phone numbers</span>
-                      )}
-                    </td>
-
-                    {/* Connection */}
-                    <td className="px-5 py-3.5 text-center align-middle">
-                      {phone ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/60 px-2.5 py-1 rounded-full border border-gray-200/60 dark:border-gray-800">
-                          <span className={`h-2 w-2 rounded-full ${statusMeta(phone.status).dot} animate-pulse`} />
-                          {statusMeta(phone.status).label}
-                        </span>
-                      ) : (
-                        <span className="text-gray-300 dark:text-gray-600">—</span>
-                      )}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-5 py-3.5 text-right align-middle">
-                      {phone ? (
-                        <button
-                          onClick={() => onOpenConsole(phone)}
-                          className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-emerald-200/80 dark:border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-500/10 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white text-xs font-semibold text-emerald-700 dark:text-emerald-400 transition-all duration-200 shadow-sm"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5" />
-                          <span>Messages</span>
-                        </button>
-                      ) : (
-                        <span className="text-gray-300 dark:text-gray-600">—</span>
-                      )}
-                    </td>
-                  </tr>
-                ));
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
 /*                               Details Drawer                               */
 /* -------------------------------------------------------------------------- */
 
 function DetailsDrawer({
   business,
+  clientDetail,
   onClose,
   onOpenConsole,
 }: {
   business: BusinessNode;
+  clientDetail?: ClientDetailMeta | null;
   onClose: () => void;
   onOpenConsole: (phone: PhoneNumber) => void;
 }) {
@@ -513,7 +340,7 @@ function DetailsDrawer({
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} aria-hidden />
       <div className="relative h-full w-full max-w-lg bg-white dark:bg-gray-900 shadow-2xl flex flex-col animate-slide-in-right">
-        {/* header */}
+        {/* Header */}
         <div className="flex items-start justify-between gap-3 p-5 border-b border-gray-100 dark:border-gray-800">
           <div className="min-w-0">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white truncate">{business.businessName}</h2>
@@ -533,6 +360,7 @@ function DetailsDrawer({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="shrink-0 flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             aria-label="Close"
@@ -541,8 +369,36 @@ function DetailsDrawer({
           </button>
         </div>
 
-        {/* body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {clientDetail && (
+            <div className="rounded-2xl border border-emerald-100 dark:border-emerald-500/10 bg-emerald-50/20 dark:bg-emerald-500/5 p-4 space-y-3 shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                Client / Owner Profile
+              </p>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact Person</p>
+                  <p className="font-bold text-gray-900 dark:text-white mt-0.5">{clientDetail.name}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email Address</p>
+                  <p className="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{clientDetail.email}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Phone Number</p>
+                  <p className="font-mono text-gray-700 dark:text-gray-300 mt-0.5">{clientDetail.phoneNumber}</p>
+                </div>
+                {clientDetail.companyName && (
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Company Name</p>
+                    <p className="font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">{clientDetail.companyName}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">WABA Accounts</p>
           {business.wabas.map((waba) => (
             <div key={waba.id} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40 p-4">
@@ -561,46 +417,29 @@ function DetailsDrawer({
                 {waba.phoneNumbers.length === 0 ? (
                   <p className="text-[11px] text-gray-400">No phone numbers registered.</p>
                 ) : (
-                  waba.phoneNumbers.map((phone) => {
-                    const s = statusMeta(phone.status);
-                    const q = qualityMeta(phone.qualityRating);
-                    return (
-                      <div
-                        key={phone.id}
-                        className="flex flex-col gap-2 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-3.5 shadow-sm"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-2 min-w-0">
-                            <Smartphone className="w-3.5 h-3.5 text-gray-400" />
-                            <span className="font-mono text-xs font-semibold text-gray-900 dark:text-white truncate">{phone.displayPhoneNumber}</span>
-                            <CopyButton value={phone.displayPhoneNumber} label="phone number" />
-                          </span>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400">
-                              <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
-                              {s.label}
-                            </span>
-                            <span className="text-gray-300 dark:text-gray-600">•</span>
-                            <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${q.text}`}>
-                              {q.label} Quality
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex justify-end border-t border-gray-50 dark:border-gray-800/40 pt-2.5 mt-1">
-                          <button
-                            onClick={() => {
-                              onClose();
-                              onOpenConsole(phone);
-                            }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/30 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5" />
-                            <span>Messages</span>
-                          </button>
-                        </div>
+                  waba.phoneNumbers.map((phone) => (
+                    <div
+                      key={phone.id}
+                      className="flex flex-col gap-2 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-3.5 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-2 min-w-0">
+                          <Smartphone className="w-3.5 h-3.5 text-gray-400" />
+                          <span className="font-mono text-xs font-semibold text-gray-900 dark:text-white truncate">{phone.displayPhoneNumber}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onClose();
+                            onOpenConsole(phone);
+                          }}
+                          className="px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                        >
+                          Messages
+                        </button>
                       </div>
-                    );
-                  })
+                    </div>
+                  ))
                 )}
               </div>
             </div>
@@ -615,24 +454,6 @@ function DetailsDrawer({
 /*                               Console Drawer                               */
 /* -------------------------------------------------------------------------- */
 
-interface CustomerRecord {
-  customerNumber: string;
-  customerName: string | null;
-}
-
-interface MessageRecord {
-  id: string;
-  wamid: string | null;
-  customerNumber: string;
-  customerName: string | null;
-  direction: "INBOUND" | "OUTBOUND";
-  messageType: string | null;
-  messageText: string | null;
-  status: string;
-  sendTime: string | null;
-  createdOn: string;
-}
-
 function ConsoleDrawer({
   phone,
   onClose,
@@ -640,202 +461,27 @@ function ConsoleDrawer({
   phone: PhoneNumber;
   onClose: () => void;
 }) {
-  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
-  const [customerSearch, setCustomerSearch] = useState("");
-
-  // Query unique customers from database
-  const { data: customers, isLoading: loadingCustomers } = useQuery<CustomerRecord[]>({
-    queryKey: ["whatsapp", "customers", phone.id],
-    queryFn: () => apiFetch<CustomerRecord[]>(`/whatsapp/numbers/${phone.id}/customers`),
-    refetchInterval: 10000,
-  });
-
-  // Query logs for active customer connection
-  const { data: messages, isLoading: loadingMessages } = useQuery<MessageRecord[]>({
-    queryKey: ["whatsapp", "messages", phone.id, selectedCustomer],
-    queryFn: () =>
-      apiFetch<MessageRecord[]>(
-        `/whatsapp/numbers/${phone.id}/messages?customerNumber=${encodeURIComponent(
-          selectedCustomer || ""
-        )}`
-      ),
-    enabled: !!selectedCustomer,
-    refetchInterval: 5000,
-  });
-
-  const filteredCustomers = useMemo(() => {
-    if (!customers) return [];
-    const q = customerSearch.trim().toLowerCase();
-    if (!q) return customers;
-    return customers.filter(
-      (c) =>
-        c.customerNumber.toLowerCase().includes(q) ||
-        (c.customerName && c.customerName.toLowerCase().includes(q))
-    );
-  }, [customers, customerSearch]);
-
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-        aria-hidden
-      />
-      {/* Panel */}
-      <div className="relative h-full w-full max-w-4xl bg-white dark:bg-gray-900 shadow-2xl flex flex-col animate-slide-in-right">
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>WhatsApp Conversations</span>
-            </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Business Number: <span className="font-mono font-semibold">{phone.displayPhoneNumber}</span>
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5" />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} aria-hidden />
+      <div className="relative h-full w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl flex flex-col animate-slide-in-right p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-gray-900 dark:text-white">Line Console</h3>
+          <button type="button" onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
           </button>
         </div>
-
-        {/* Content split panel */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Left panel: Customers list */}
-          <div className="w-[35%] border-r border-gray-100 dark:border-gray-800 flex flex-col bg-gray-50/50 dark:bg-gray-950/20">
-            {/* Search */}
-            <div className="p-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search customers..."
-                  value={customerSearch}
-                  onChange={(e) => setCustomerSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
-                />
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400" />
-              </div>
-            </div>
-
-            {/* List */}
-            <div className="flex-1 overflow-y-auto p-2 space-y-1">
-              {loadingCustomers ? (
-                <div className="flex flex-col gap-2 p-3">
-                  <div className="h-10 w-full animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
-                  <div className="h-10 w-full animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
-                </div>
-              ) : filteredCustomers.length === 0 ? (
-                <div className="text-center py-10 px-3 text-xs text-gray-400">
-                  No active customers found.
-                </div>
-              ) : (
-                filteredCustomers.map((customer) => {
-                  const isActive = selectedCustomer === customer.customerNumber;
-                  return (
-                    <button
-                      key={customer.customerNumber}
-                      onClick={() => setSelectedCustomer(customer.customerNumber)}
-                      className={`w-full flex flex-col text-left px-3 py-2.5 rounded-xl transition-all duration-150 ${isActive
-                        ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm"
-                        : "hover:bg-gray-100/70 dark:hover:bg-gray-800/40 text-gray-700 dark:text-gray-300"
-                        }`}
-                    >
-                      <span className="font-semibold text-xs truncate">
-                        {customer.customerName || "Unknown Customer"}
-                      </span>
-                      <span
-                        className={`font-mono text-[10px] mt-0.5 ${isActive ? "text-emerald-100" : "text-gray-400"
-                          }`}
-                      >
-                        {customer.customerNumber}
-                      </span>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Right panel: Timeline */}
-          <div className="w-[65%] flex flex-col bg-white dark:bg-gray-900">
-            {selectedCustomer ? (
-              <>
-                {/* Chat header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
-                  <div>
-                    <h3 className="font-bold text-xs text-gray-900 dark:text-white">
-                      {customers?.find((c) => c.customerNumber === selectedCustomer)?.customerName ||
-                        "Unknown"}
-                    </h3>
-                    <p className="font-mono text-[10px] text-gray-400 mt-0.5">{selectedCustomer}</p>
-                  </div>
-                  <CopyButton value={selectedCustomer} label="customer number" />
-                </div>
-
-                {/* Chat logs */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30 dark:bg-gray-950/5">
-                  {loadingMessages && !messages ? (
-                    <div className="flex flex-col gap-3 py-4">
-                      <div className="h-12 w-2/3 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-                      <div className="h-12 w-2/3 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse align-self-end ml-auto" />
-                    </div>
-                  ) : messages?.length === 0 ? (
-                    <div className="text-center py-20 text-xs text-gray-400">
-                      No logs found for this conversation.
-                    </div>
-                  ) : (
-                    messages?.map((msg) => {
-                      const isOutbound = msg.direction === "OUTBOUND";
-                      const time = new Date(msg.createdOn).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      });
-                      const date = new Date(msg.createdOn).toLocaleDateString([], {
-                        month: "short",
-                        day: "numeric",
-                      });
-
-                      return (
-                        <div
-                          key={msg.id}
-                          className={`flex flex-col max-w-[80%] ${isOutbound ? "ml-auto items-end" : "mr-auto items-start"
-                            }`}
-                        >
-                          <div
-                            className={`px-3.5 py-2.5 rounded-2xl shadow-sm text-xs leading-relaxed ${isOutbound
-                              ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-tr-none"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 rounded-tl-none border border-gray-200/50 dark:border-gray-700/50"
-                              }`}
-                          >
-                            <p className="whitespace-pre-wrap">{msg.messageText}</p>
-                          </div>
-                          <span className="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
-                            <span>{date}, {time}</span>
-                            {isOutbound && (
-                              <span className="flex items-center text-emerald-500">
-                                <CheckCheck className="w-3.5 h-3.5" />
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-gray-400">
-                <MessageSquare className="w-8 h-8 text-gray-300 dark:text-gray-700 mb-2" />
-                <p className="text-xs">{EMPTY_STATE_COPY.messageConsole.description}</p>
-              </div>
-            )}
-          </div>
+        <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 space-y-2 text-xs">
+          <p className="font-bold text-gray-900 dark:text-white">Phone: {phone.displayPhoneNumber}</p>
+          <p className="text-gray-500 font-mono">WABA ID: {phone.wabaId}</p>
         </div>
+        <Link
+          href={`/messages?phoneId=${encodeURIComponent(phone.id)}`}
+          className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20"
+        >
+          <MessageCircle className="w-4 h-4" />
+          <span>Go to Send Message Studio</span>
+        </Link>
       </div>
     </div>
   );
@@ -843,13 +489,7 @@ function ConsoleDrawer({
 
 export default function ClientsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex h-[80vh] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="p-8 text-xs text-gray-400 animate-pulse">Loading clients dashboard...</div>}>
       <ClientsContent />
     </Suspense>
   );

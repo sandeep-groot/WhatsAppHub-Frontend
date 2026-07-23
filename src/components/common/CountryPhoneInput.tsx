@@ -75,7 +75,7 @@ export function CountryPhoneInput({
   value,
   onChange,
   disabled = false,
-  placeholder = "e.g. 7428730894",
+  placeholder = "Enter phone number",
   required = false,
 }: CountryPhoneInputProps) {
   const parsed = parsePhoneNumber(value);
