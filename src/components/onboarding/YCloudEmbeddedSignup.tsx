@@ -165,11 +165,10 @@ export default function YCloudEmbeddedSignup({
           type="button"
           onClick={handleLaunchSignup}
           disabled={disabled || !isSdkLoaded || isSigningUp || !isConfigured}
-          className={`flex w-full items-center justify-center gap-3 rounded-2xl py-3.5 text-sm font-bold transition-all duration-200 ${
-            isConfigured
+          className={`flex w-full items-center justify-center gap-3 rounded-2xl py-3.5 text-sm font-bold transition-all duration-200 ${isConfigured
               ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 active:scale-[0.98]"
               : "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800"
-          }`}
+            }`}
         >
           {isSigningUp ? (
             <div className="flex items-center gap-2.5">

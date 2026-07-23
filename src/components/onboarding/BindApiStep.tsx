@@ -15,12 +15,21 @@ interface BindApiStepProps {
   signupResult: EmbeddedSignupResult;
   onSuccess: () => void;
   onError: (message: string) => void;
+  clientDetailId?: string | null;
+  newClientDetails?: {
+    name: string;
+    email: string;
+    phoneNumber: string;
+    companyName?: string | null;
+  } | null;
 }
 
 export default function BindApiStep({
   signupResult,
   onSuccess,
   onError,
+  clientDetailId = null,
+  newClientDetails = null,
 }: BindApiStepProps) {
   const [isBinding, setIsBinding] = useState(false);
   const [jsonCopied, setJsonCopied] = useState(false);
@@ -32,13 +41,15 @@ export default function BindApiStep({
         {
           wabaId: signupResult.wabaId,
           phoneNumberId: signupResult.phoneNumberId,
+          clientDetailId,
+          newClientDetails,
           ...(signupResult.businessId ? { businessId: signupResult.businessId } : {}),
           ...(signupResult.authCode ? { authCode: signupResult.authCode } : {}),
         },
         null,
         2,
       ),
-    [signupResult],
+    [signupResult, clientDetailId, newClientDetails],
   );
 
   async function handleCopyJson() {
@@ -50,9 +61,11 @@ export default function BindApiStep({
   async function handleBind() {
     setIsBinding(true);
     try {
-      const bindData: WabaBindRequest = {
+      const bindData = {
         wabaId: signupResult.wabaId,
         phoneNumberId: signupResult.phoneNumberId,
+        clientDetailId,
+        newClientDetails,
       };
 
       const result = await apiFetch<WabaBindResponse>("/whatsapp/waba/bind", {
