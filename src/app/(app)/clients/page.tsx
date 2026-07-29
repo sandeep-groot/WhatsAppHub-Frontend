@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, Suspense } from "react";
+import React, { useMemo, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/http";
 import { buildBusinessHierarchy } from "@/modules/clients/utils";
@@ -461,27 +461,233 @@ function ConsoleDrawer({
   phone: PhoneNumber;
   onClose: () => void;
 }) {
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const [customerSearch, setCustomerSearch] = useState("");
+
+  const { data: customers, isLoading: loadingCustomers } = useQuery<
+    Array<{ customerNumber: string; customerName: string | null }>
+  >({
+    queryKey: ["whatsapp", "customers", phone.id],
+    queryFn: () => apiFetch(`/whatsapp/numbers/${phone.id}/customers`),
+    enabled: !!phone.id,
+  });
+
+  useEffect(() => {
+    if (customers && customers.length > 0 && !selectedCustomer) {
+      setSelectedCustomer(customers[0].customerNumber);
+    }
+  }, [customers, selectedCustomer]);
+
+  const { data: messages, isLoading: loadingMessages } = useQuery<
+    Array<{
+      id: string;
+      direction: string;
+      messageText?: string;
+      body?: string;
+      createdOn: string;
+      status?: string;
+    }>
+  >({
+    queryKey: ["whatsapp", "messages", phone.id, selectedCustomer],
+    queryFn: () =>
+      apiFetch(
+        `/whatsapp/numbers/${phone.id}/messages?customerNumber=${encodeURIComponent(
+          selectedCustomer || ""
+        )}`
+      ),
+    enabled: !!phone.id && !!selectedCustomer,
+    refetchInterval: 3000,
+  });
+
+  const filteredCustomers = useMemo(() => {
+    if (!customers) return [];
+    if (!customerSearch.trim()) return customers;
+    const q = customerSearch.toLowerCase();
+    return customers.filter(
+      (c) =>
+        c.customerNumber.toLowerCase().includes(q) ||
+        (c.customerName && c.customerName.toLowerCase().includes(q))
+    );
+  }, [customers, customerSearch]);
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} aria-hidden />
-      <div className="relative h-full w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl flex flex-col animate-slide-in-right p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-gray-900 dark:text-white">Line Console</h3>
-          <button type="button" onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
-            <X className="w-5 h-5" />
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+        aria-hidden
+      />
+      <div className="relative h-full w-full max-w-2xl bg-white dark:bg-gray-900 shadow-2xl flex flex-col animate-slide-in-right">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>WhatsApp Conversations</span>
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              Business Number:{" "}
+              <span className="font-mono font-semibold">
+                {phone.displayPhoneNumber || phone.phoneNumber}
+              </span>
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 space-y-2 text-xs">
-          <p className="font-bold text-gray-900 dark:text-white">Phone: {phone.displayPhoneNumber}</p>
-          <p className="text-gray-500 font-mono">WABA ID: {phone.wabaId}</p>
+
+        <div className="flex flex-1 overflow-hidden">
+          <div className="w-[35%] border-r border-gray-100 dark:border-gray-800 flex flex-col bg-gray-50/50 dark:bg-gray-950/20">
+            <div className="p-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search customers..."
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+                />
+                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400" />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+              {loadingCustomers ? (
+                <div className="flex flex-col gap-2 p-3">
+                  <div className="h-10 w-full animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
+                  <div className="h-10 w-full animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
+                </div>
+              ) : filteredCustomers.length === 0 ? (
+                <div className="text-center py-10 px-3 text-xs text-gray-400">
+                  No active customers found.
+                </div>
+              ) : (
+                filteredCustomers.map((customer) => {
+                  const isActive = selectedCustomer === customer.customerNumber;
+                  return (
+                    <button
+                      key={customer.customerNumber}
+                      type="button"
+                      onClick={() => setSelectedCustomer(customer.customerNumber)}
+                      className={`w-full flex flex-col text-left px-3 py-2.5 rounded-xl transition-all duration-150 ${
+                        isActive
+                          ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm"
+                          : "hover:bg-gray-100/70 dark:hover:bg-gray-800/40 text-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      <span className="font-semibold text-xs truncate">
+                        {customer.customerName || "Unknown Customer"}
+                      </span>
+                      <span
+                        className={`font-mono text-[10px] mt-0.5 ${
+                          isActive ? "text-emerald-100" : "text-gray-400"
+                        }`}
+                      >
+                        {customer.customerNumber}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          <div className="w-[65%] flex flex-col bg-white dark:bg-gray-900">
+            {selectedCustomer ? (
+              <>
+                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
+                  <div>
+                    <h3 className="font-bold text-xs text-gray-900 dark:text-white">
+                      {customers?.find((c) => c.customerNumber === selectedCustomer)
+                        ?.customerName || "Unknown"}
+                    </h3>
+                    <p className="font-mono text-[10px] text-gray-400 mt-0.5">
+                      {selectedCustomer}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigator.clipboard.writeText(selectedCustomer)}
+                    className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-xs font-semibold"
+                    title="Copy customer number"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30 dark:bg-gray-950/5">
+                  {loadingMessages && !messages ? (
+                    <div className="flex flex-col gap-3 py-4">
+                      <div className="h-12 w-2/3 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+                      <div className="h-12 w-2/3 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse align-self-end ml-auto" />
+                    </div>
+                  ) : messages?.length === 0 ? (
+                    <div className="text-center py-20 text-xs text-gray-400">
+                      No logs found for this conversation.
+                    </div>
+                  ) : (
+                    messages?.map((msg) => {
+                      const isOutbound =
+                        msg.direction === "outbound" || msg.direction === "OUTBOUND";
+                      const time = new Date(msg.createdOn).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
+                      const date = new Date(msg.createdOn).toLocaleDateString([], {
+                        month: "short",
+                        day: "numeric",
+                      });
+
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex flex-col max-w-[80%] ${
+                            isOutbound ? "ml-auto items-end" : "mr-auto items-start"
+                          }`}
+                        >
+                          <div
+                            className={`px-3.5 py-2.5 rounded-2xl shadow-sm text-xs leading-relaxed ${
+                              isOutbound
+                                ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-tr-none"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 rounded-tl-none border border-gray-200/50 dark:border-gray-700/50"
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap">
+                              {msg.messageText || msg.body || "—"}
+                            </p>
+                          </div>
+                          <span className="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
+                            <span>
+                              {date}, {time}
+                            </span>
+                            {isOutbound && (
+                              <span className="flex items-center text-emerald-500">
+                                <Check className="w-3.5 h-3.5" />
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-gray-400">
+                <MessageSquare className="w-8 h-8 text-gray-300 dark:text-gray-700 mb-2" />
+                <p className="text-xs">
+                  {EMPTY_STATE_COPY.messageConsole?.description ||
+                    "Select a customer conversation from the list to view logs."}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-        <Link
-          href={`/messages?phoneId=${encodeURIComponent(phone.id)}`}
-          className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20"
-        >
-          <MessageCircle className="w-4 h-4" />
-          <span>Go to Send Message Studio</span>
-        </Link>
       </div>
     </div>
   );
