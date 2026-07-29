@@ -7,7 +7,7 @@ import {
   ChevronDownIcon as ChevronDown,
   EyeIcon as Eye,
   MessageSquareIcon as MessageSquare,
-  SmartphoneIcon as Smartphone,
+  PhoneIcon,
   WhatsAppIcon,
   CheckIcon as Check,
   CopyDuplicateIcon as Copy,
@@ -293,7 +293,7 @@ export default function PortfolioSubCard({
                     <td className="px-4 py-3 align-middle">
                       {phone ? (
                         <span className="inline-flex items-center gap-1.5">
-                          <Smartphone className="w-3.5 h-3.5 text-gray-400" />
+                          <PhoneIcon className="w-3.5 h-3.5 text-gray-400" />
                           <span className="font-mono text-xs font-semibold text-gray-900 dark:text-white">
                             {phone.displayPhoneNumber}
                           </span>
