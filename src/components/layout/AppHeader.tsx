@@ -1,43 +1,39 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { useTheme } from "@/context/ThemeContext";
 import { ProfileModal } from "@/components/auth/ProfileModal";
-import { LogoutConfirmModal } from "@/components/auth/LogoutConfirmModal";
+import { PAGE_ROUTES } from "@/lib/constants";
 import {
-  BellIcon as Bell,
   ChevronDownIcon as ChevronDown,
-  LogOutIcon as LogOut,
+  DeletionIcon as Deletion,
   MenuIcon as Menu,
   MoonIcon as Moon,
+  PolicyIcon as Policy,
   SunIcon as Sun,
+  TermsIcon as Terms,
   UserIcon,
 } from "@/icons";
 
 const AppHeader: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { toggleMobileSidebar } = useSidebar();
   const { isDark, toggleTheme } = useTheme();
   const displayName = user?.name || user?.email?.split("@")[0] || "User";
   const roleLabel = user?.roles ? user.roles.join(", ") : "";
   const avatarLetter = (displayName[0] ?? "U").toUpperCase();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const notificationRef = useRef<HTMLDivElement>(null);
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false);
-      }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
-        setIsNotificationOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -64,32 +60,6 @@ const AppHeader: React.FC = () => {
 
         {/* Right */}
         <div className="flex items-center gap-1.5 sm:gap-3">
-
-          {/* Notifications */}
-          <div className="relative" ref={notificationRef}>
-            <button
-              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              className="relative p-2 text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-800 dark:text-gray-400 rounded-xl transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            </button>
-            {isNotificationOpen && (
-              <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700 overflow-hidden animate-fade-in">
-                <div className="p-4 border-b border-gray-100 dark:border-gray-700/80">
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">Notifications</h3>
-                </div>
-                <div className="divide-y divide-gray-100 dark:divide-gray-700/60 max-h-80 overflow-y-auto">
-                  <div className="p-4 hover:bg-emerald-50/50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
-                    <p className="text-xs font-semibold text-gray-900 dark:text-white">System Update</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">WhatsApp connections are operating normally.</p>
-                    <p className="text-[10px] text-gray-400 mt-1.5">Just now</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Theme toggle */}
           <button
@@ -126,7 +96,7 @@ const AppHeader: React.FC = () => {
               <ChevronDown className="hidden md:block w-4 h-4 text-gray-400 group-hover:text-emerald-600 transition-transform duration-200" />
             </button>
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden animate-fade-in">
+              <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden animate-fade-in">
                 <ul className="py-1">
                   <li>
                     <button
@@ -135,25 +105,47 @@ const AppHeader: React.FC = () => {
                         setIsUserMenuOpen(false);
                         setIsProfileModalOpen(true);
                       }}
-                      className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700/60 dark:hover:text-emerald-400 transition-colors"
+                      className="group w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700/60 dark:hover:text-emerald-400 transition-colors"
                     >
-                      <UserIcon className="w-4 h-4 text-gray-400" />
+                      <UserIcon className="w-4 h-4 text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
                       <span>Profile</span>
                     </button>
                   </li>
-                  <li className="border-t border-gray-100 dark:border-gray-700/80">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        setIsLogoutConfirmOpen(true);
-                      }}
-                      className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+
+                  {/* 
+                  <li className="border-t border-gray-100 dark:border-gray-700/80 my-1" />
+
+                  <li>
+                    <Link
+                      href={PAGE_ROUTES.TERMS}
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="group w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700/60 dark:hover:text-emerald-400 transition-colors"
                     >
-                      <LogOut className="w-4 h-4 text-rose-500" />
-                      <span>Logout</span>
-                    </button>
+                      <Terms className="w-4 h-4 text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
+                      <span>Terms of Service</span>
+                    </Link>
                   </li>
+                  <li>
+                    <Link
+                      href={PAGE_ROUTES.PRIVACY}
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="group w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700/60 dark:hover:text-emerald-400 transition-colors"
+                    >
+                      <Policy className="w-4 h-4 text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
+                      <span>Privacy Policy</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href={PAGE_ROUTES.DATA_DELETION}
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="group w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-gray-700/60 dark:hover:text-emerald-400 transition-colors"
+                    >
+                      <Deletion className="w-4 h-4 text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
+                      <span>Data Deletion</span>
+                    </Link>
+                  </li>
+                  */}
                 </ul>
               </div>
             )}
@@ -165,12 +157,6 @@ const AppHeader: React.FC = () => {
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-      />
-
-      <LogoutConfirmModal
-        isOpen={isLogoutConfirmOpen}
-        onClose={() => setIsLogoutConfirmOpen(false)}
-        onConfirm={logout}
       />
     </header>
   );
