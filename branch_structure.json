@@ -1,0 +1,33 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "development",
+    "feature/new-onboarding",
+    "feature/pre-development-clinet-registry",
+    "fix/app-icons",
+    "main",
+    "origin",
+    "update/code-update",
+    "update/logo-login-page"
+  ],
+  "parent": {
+    "development": "main",
+    "feature/new-onboarding": "main",
+    "feature/pre-development-clinet-registry": "main",
+    "fix/app-icons": "main",
+    "main": null,
+    "origin": "main",
+    "update/code-update": "main",
+    "update/logo-login-page": "main"
+  },
+  "order": [
+    "main",
+    "development",
+    "feature/new-onboarding",
+    "feature/pre-development-clinet-registry",
+    "fix/app-icons",
+    "origin",
+    "update/code-update",
+    "update/logo-login-page"
+  ]
+}
