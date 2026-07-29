@@ -157,14 +157,6 @@ export default function ClientGroupCard({
               </p>
             </div>
           </div>
-
-          <Link
-            href={PAGE_ROUTES.ONBOARDING}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition-all"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Portfolio</span>
-          </Link>
         </div>
       </div>
 
