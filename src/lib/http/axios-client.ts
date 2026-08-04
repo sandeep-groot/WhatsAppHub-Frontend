@@ -1,4 +1,4 @@
-import { clearAuthSession } from "@/lib/auth";
+import { clearAuthSession, hasActiveSessionMarker } from "@/lib/auth";
 import { refreshAccessToken } from "@/lib/auth/token-refresh";
 import { notifySessionExpired } from "@/lib/auth/session-events";
 import { API_ROUTES } from "@/lib/constants";
@@ -49,8 +49,11 @@ function processQueue(error: unknown | null): void {
 }
 
 function handleAuthFailure(error: unknown): void {
+  const wasSessionActive = hasActiveSessionMarker();
   clearAuthSession();
-  notifySessionExpired();
+  if (wasSessionActive) {
+    notifySessionExpired();
+  }
   processQueue(error);
 }
 
