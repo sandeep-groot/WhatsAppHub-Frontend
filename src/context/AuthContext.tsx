@@ -129,13 +129,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const logout = useCallback(() => {
+    setIsLoading(true);
     void logoutSession().finally(() => {
+      clearAuthSession();
       setIsAuthenticated(false);
       setUser(null);
       clearSessionExpiredMessage();
-      router.replace(PAGE_ROUTES.LOGIN);
+      if (typeof window !== "undefined") {
+        window.location.href = PAGE_ROUTES.LOGIN;
+      }
     });
-  }, [router, clearSessionExpiredMessage]);
+  }, [clearSessionExpiredMessage]);
 
   return (
     <AuthContext.Provider

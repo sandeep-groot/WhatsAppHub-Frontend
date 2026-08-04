@@ -38,7 +38,16 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!isAuthenticated) {
-    return null;
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+            Redirecting to login...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;
