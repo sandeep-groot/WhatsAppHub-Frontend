@@ -43,6 +43,13 @@ export function markSessionActive(): void {
   document.cookie = `${AUTH_SESSION_COOKIE}=1; ${sessionCookieSuffix(SESSION_MAX_AGE_SEC)}`;
 }
 
+export function hasActiveSessionMarker(): boolean {
+  if (!isBrowser()) return false;
+  const hasCookie = document.cookie.includes(`${AUTH_SESSION_COOKIE}=`);
+  const hasUser = localStorage.getItem(USER_KEY) !== null;
+  return hasCookie || hasUser;
+}
+
 export function getStoredUser(): StoredAuthUser | null {
   if (!isBrowser()) return null;
   const raw = localStorage.getItem(USER_KEY);
@@ -62,8 +69,21 @@ export function setStoredUser(user: StoredAuthUser): void {
 
 export function clearAuthSession(): void {
   if (!isBrowser()) return;
-  localStorage.removeItem(USER_KEY);
+  try {
+    localStorage.removeItem(USER_KEY);
+    // localStorage.clear();
+  } catch {
+    /* noop */
+  }
+  try {
+    sessionStorage.clear();
+  } catch {
+    /* noop */
+  }
   const secure =
     window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${AUTH_SESSION_COOKIE}=; path=/; max-age=0; SameSite=Strict${secure}`;
+  const pastDate = "expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0";
+  document.cookie = `${AUTH_SESSION_COOKIE}=; path=/; ${pastDate}; SameSite=Lax${secure}`;
+  document.cookie = `access_token=; path=/; ${pastDate}; SameSite=Lax${secure}`;
+  document.cookie = `refresh_token=; path=/; ${pastDate}; SameSite=Lax${secure}`;
 }

@@ -45,7 +45,7 @@ export default function SignInForm() {
     setIsSubmitting(true);
 
     try {
-      await login(email.trim(), password);
+      await login(email.trim(), password, isChecked);
       const destination = resolvePostLoginPath(redirect, PAGE_ROUTES.DASHBOARD);
       router.refresh();
       router.replace(destination);
