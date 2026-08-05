@@ -94,6 +94,15 @@
   }
 }
 
+/* Hide Next.js local development indicator */
+nextjs-portal,
+[data-nextjs-dialog-overlay],
+[data-nextjs-toast],
+div[class*="nextjs-static-indicator"],
+div[class*="nextjs-container"] {
+  display: none !important;
+}
+
 /* Buttons — WhatsApp emerald primary (matches sidebar / header) */
 .btn-primary {
   padding: 0.75rem 1rem;
