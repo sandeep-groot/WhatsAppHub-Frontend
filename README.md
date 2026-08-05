@@ -1,80 +1,137 @@
 # WhatsAppHub Frontend
 
-A modern, scalable Next.js frontend for the WhatsApp Business Automation Platform.
+WhatsAppHub Frontend is a modern Next.js application for managing WhatsApp Business automation workflows, clients, users, webhooks, onboarding, and audit logs.
 
-## 🚀 Quick Start
+## Prerequisites
 
-### Installation
+Before you start, make sure you have the following installed:
+
+- Node.js 20+ and npm 10+
+- A running backend service for API requests
+- Optional: Git, Docker, and a hosting platform such as Vercel or a Linux server
+
+## 1. Clone and install dependencies
+
 ```bash
+git clone <repository-url>
+cd WhatsAppHub-Frontend
 npm install
 ```
 
-### Development
+## 2. Configure environment variables
+
+Create a local environment file from the example file:
+
+```bash
+copy .env.example .env.local
+```
+
+Then update the values in .env.local:
+
+```env
+NEXT_PUBLIC_API_URL=/v1
+API_PROXY_TARGET=http://localhost:5000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_NAME=WhatsAppHub
+```
+
+### Important notes
+
+- If your backend is running on a different port, update API_PROXY_TARGET.
+- If the frontend should call the backend directly instead of using the local proxy, change NEXT_PUBLIC_API_URL accordingly.
+- For Facebook and YCloud integrations, fill in the public keys shown in the example file.
+
+## 3. Run the application locally
+
+### Development server
+
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-### Build & Deploy
+### HTTPS development mode
+
+If you need HTTPS for local testing:
+
+```bash
+npm run dev-https
+```
+
+## 4. Build for production
+
+Run the production build:
+
+```bash
+npm run build
+```
+
+Then start the production server:
+
+```bash
+npm start
+```
+
+## 5. Common scripts
+
+```bash
+npm run dev          # Start the development server
+npm run dev-https    # Start the development server with HTTPS
+npm run build        # Create a production build
+npm start            # Start the production server
+npm run lint         # Run ESLint
+npm run type-check   # Check TypeScript types
+npm run format       # Format source files with Prettier
+```
+
+## 6. Deployment instructions
+
+### Option A: Vercel
+
+1. Push the project to GitHub.
+2. Create a new project in Vercel and import the repository.
+3. Set the build command to:
+
+```bash
+npm run build
+```
+
+4. Add the required environment variables from .env.local in Vercel settings.
+5. Deploy the project.
+
+### Option B: Self-hosted / server deployment
+
+After building the app:
+
 ```bash
 npm run build
 npm start
 ```
 
-## 📁 Project Structure
+Use a process manager such as PM2, Docker, or a reverse proxy such as Nginx for production hosting.
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed information about the project structure and architecture.
+Ensure your production environment has the correct values for:
 
-## 🎯 Key Features
+- NEXT_PUBLIC_API_URL
+- API_PROXY_TARGET
+- NEXT_PUBLIC_APP_URL
 
-- **Modern Next.js 16+**: Latest React and Next.js features
-- **Type-Safe**: Full TypeScript support
-- **Modular Architecture**: Domain-driven design
-- **State Management**: Zustand for UI state, TanStack Query for server state
-- **Form Validation**: Zod schema validation
-- **RBAC**: Built-in role-based access control
-- **API Integration**: Centralized HTTP client with error handling
+## Troubleshooting
 
-## 📚 Documentation
+- If the app cannot reach the backend, verify that the backend is running and that API_PROXY_TARGET points to the correct host and port.
+- If pages do not load correctly, run npm run build to confirm there are no compile issues.
+- If you see authentication or session issues, confirm the environment values for the app URL and API endpoints.
 
-- [Architecture Guide](./ARCHITECTURE.md) - Detailed system design
-- [Setup Summary](./SETUP_SUMMARY.md) - Complete setup checklist
+## Project structure overview
 
-## 🛠️ Tech Stack
+- src/app: page routes and app layout
+- src/components: reusable UI and feature components
+- src/context: auth, theme, and layout context providers
+- src/lib: shared utilities and environment helpers
+- src/modules: business-feature modules
+- src/types: shared TypeScript types
 
-- **Framework**: Next.js 16+
-- **Language**: TypeScript
-- **UI**: React 19+, TailwindCSS (recommended)
-- **State**: Zustand, TanStack Query
-- **Validation**: Zod
-- **HTTP**: Fetch API with custom wrapper
-
-## 📝 Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run type-check` - Check TypeScript types
-- `npm run format` - Format code with Prettier
-
-## 🔐 Environment Setup
-
-Copy `.env.example` to `.env.local` and fill in your values:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3000/api
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=WhatsAppHub
-```
-
-## 📖 Learn More
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Documentation](https://react.dev)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs)
-
-## 📄 License
+## License
 
 This project is proprietary and confidential.
