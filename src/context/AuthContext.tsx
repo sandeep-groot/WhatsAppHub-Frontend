@@ -23,7 +23,7 @@ interface AuthContextType {
   isLoading: boolean;
   user: StoredAuthUser | null;
   sessionExpiredMessage: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<boolean>;
   clearSessionExpiredMessage: () => void;
@@ -51,18 +51,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSessionExpiredMessage(message);
     const loginUrl = new URL(PAGE_ROUTES.LOGIN, window.location.origin);
     loginUrl.searchParams.set("sessionExpired", "1");
-    setPendingRedirect(loginUrl.pathname + loginUrl.search);
+    window.location.href = loginUrl.pathname + loginUrl.search;
   }, []);
 
   useEffect(() => {
     return onSessionExpired(handleSessionExpired);
   }, [handleSessionExpired]);
-
-  useEffect(() => {
-    if (!pendingRedirect) return;
-    router.replace(pendingRedirect);
-    setPendingRedirect(null);
-  }, [pendingRedirect, router]);
 
   const refreshUser = useCallback(async (): Promise<boolean> => {
     try {
@@ -107,10 +101,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [refreshUser]);
 
   const login = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string, rememberMe?: boolean) => {
       clearSessionExpiredMessage();
       try {
-        await loginWithCredentials(email, password);
+        await loginWithCredentials(email, password, rememberMe);
         const ok = await refreshUser();
         if (!ok) {
           throw new ApiError(401, "Unable to verify your session. Please try again.");
@@ -129,13 +123,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const logout = useCallback(() => {
+    setIsLoading(true);
     void logoutSession().finally(() => {
+      clearAuthSession();
       setIsAuthenticated(false);
       setUser(null);
       clearSessionExpiredMessage();
-      router.replace(PAGE_ROUTES.LOGIN);
+      if (typeof window !== "undefined") {
+        window.location.href = PAGE_ROUTES.LOGIN;
+      }
     });
-  }, [router, clearSessionExpiredMessage]);
+  }, [clearSessionExpiredMessage]);
 
   return (
     <AuthContext.Provider

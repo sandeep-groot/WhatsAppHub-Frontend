@@ -40,7 +40,7 @@ function SidebarLogo({ expanded }: { expanded: boolean }) {
     <div className="h-[84px] flex flex-col items-center justify-center px-4 py-3 shrink-0 border-b border-gray-200/20 dark:border-gray-700 bg-gradient-to-r from-[#128C7E] to-[#25D366] dark:from-[#0d2d2a] dark:to-[#0f3d30] overflow-hidden transition-all duration-300 ease-in-out">
       {expanded ? (
         <div className="w-full flex flex-col items-center animate-fade-in transition-all duration-300 ease-in-out">
-          <Image src="/images/logo/logo-dark.svg" alt={APP_CONFIG.logoAlt} width={160} height={36} priority />
+          <Image src="/images/logo/logo-dark.svg" alt={APP_CONFIG.logoAlt} width={300} height={56} priority />
           <div className="mt-2.5 w-full flex items-center justify-end gap-1.5">
             <span className="text-[9px] font-normal leading-none tracking-wide text-white/65 whitespace-nowrap">
               Powered by

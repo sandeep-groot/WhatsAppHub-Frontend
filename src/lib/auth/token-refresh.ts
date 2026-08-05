@@ -23,7 +23,6 @@ async function performRefresh(): Promise<boolean> {
 
     const body = response.data;
     if (!body.success) {
-      clearAuthSession();
       return false;
     }
 
@@ -32,14 +31,12 @@ async function performRefresh(): Promise<boolean> {
     } else {
       const cached = getStoredUser();
       if (!cached) {
-        clearAuthSession();
         return false;
       }
     }
 
     return true;
   } catch {
-    clearAuthSession();
     return false;
   }
 }
