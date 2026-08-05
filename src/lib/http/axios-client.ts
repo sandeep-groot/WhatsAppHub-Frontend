@@ -1,7 +1,7 @@
-import { clearAuthSession } from "@/lib/auth";
+import { clearAuthSession, hasActiveSessionMarker, isPublicPath } from "@/lib/auth";
 import { refreshAccessToken } from "@/lib/auth/token-refresh";
 import { notifySessionExpired } from "@/lib/auth/session-events";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES, PAGE_ROUTES } from "@/lib/constants";
 import { getApiBaseUrl } from "@/lib/env";
 import axios, {
   type AxiosError,
@@ -49,8 +49,16 @@ function processQueue(error: unknown | null): void {
 }
 
 function handleAuthFailure(error: unknown): void {
+  const wasSessionActive = hasActiveSessionMarker();
   clearAuthSession();
-  notifySessionExpired();
+  if (typeof window !== "undefined") {
+    const currentPath = window.location.pathname;
+    if (wasSessionActive && !isPublicPath(currentPath)) {
+      notifySessionExpired();
+      window.location.href = `${PAGE_ROUTES.LOGIN}?sessionExpired=1`;
+      return;
+    }
+  }
   processQueue(error);
 }
 
@@ -70,6 +78,18 @@ apiClient.interceptors.response.use(
     }
 
     const status = error.response?.status;
+
+    // If /auth/refresh or /auth/me returned 401, session is dead — trigger immediate logout redirect
+    if (
+      status === 401 &&
+      originalRequest.url &&
+      (originalRequest.url.includes(API_ROUTES.AUTH.REFRESH) ||
+        originalRequest.url.includes(API_ROUTES.AUTH.ME))
+    ) {
+      handleAuthFailure(error);
+      return Promise.reject(fromAxiosError(error));
+    }
+
     const shouldAttemptRefresh =
       status === 401 &&
       !originalRequest.skipAuthRefresh &&

@@ -147,10 +147,10 @@ export default function DashboardContent() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Backend health and WhatsApp account overview. Auto-refreshes every 30 seconds.
+            Backend health and WhatsApp account overview.
           </p>
         </div>
-        <button
+        {/* <button
           type="button"
           onClick={handleRefreshAll}
           disabled={refreshing}
@@ -162,7 +162,7 @@ export default function DashboardContent() {
             <RefreshIcon />
           )}
           Refresh
-        </button>
+        </button> */}
       </div>
 
       {/* System health */}

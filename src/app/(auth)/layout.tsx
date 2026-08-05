@@ -49,8 +49,8 @@ export default function AuthLayout({
                 <Image
                   src="/images/logo/logo-dark.svg"
                   alt="WhatsApp Hub"
-                  width={200}
-                  height={44}
+                  width={300}
+                  height={54}
                   priority
                 />
               </div>
@@ -109,8 +109,8 @@ export default function AuthLayout({
               <Image
                 src="/images/logo/logo-dark.svg"
                 alt="WhatsApp Hub"
-                width={200}
-                height={44}
+                width={300}
+                height={54}
                 priority
               />
             </div>

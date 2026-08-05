@@ -16,10 +16,11 @@ export { toStoredUser } from "./user-mapper";
 export async function loginWithCredentials(
   email: string,
   password: string,
+  rememberMe?: boolean,
 ): Promise<void> {
   await apiFetch(API_ROUTES.AUTH.LOGIN, {
     method: "POST",
-    data: { email, password },
+    data: { email, password, rememberMe },
     skipAuth: true,
     skipAuthRefresh: true,
   });
